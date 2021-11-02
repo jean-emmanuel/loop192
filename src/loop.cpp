@@ -8,6 +8,7 @@ Loop::Loop(Engine * engine, int id, snd_seq_t * seq, int port)
     m_alsa_port = port;
 
     m_recording = false;
+    m_overdubbing = false;
     m_playing = false;
 
     m_play_starting = false;
@@ -65,7 +66,6 @@ Loop::process()
         if (m_tick < m_lasttick) {
             for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
                 if ((*i).get_timestamp() > m_lasttick) {
-                    printf("send note\n");
                     (*i).send(m_alsa_seq, m_alsa_port);
                 }
             }
@@ -74,7 +74,6 @@ Loop::process()
 
         for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
             if ((*i).get_timestamp() > m_lasttick && (*i).get_timestamp() <= m_tick) {
-                printf("send note\n");
                 (*i).send(m_alsa_seq, m_alsa_port);
             } else if ((*i).get_timestamp() > m_tick) {
                 break;
@@ -91,35 +90,65 @@ void
 Loop::queue_start_recording()
 {
     stop_playing();
-    printf("Loop %i queued start recording\n", m_id);
-    m_record_starting = true;
-    m_record_stopping = false;
+    if (!m_record_starting) {
+        printf("Loop %i queued start recording\n", m_id);
+        m_record_starting = true;
+        m_record_stopping = false;
+    }
 }
 
 void
 Loop::queue_stop_recording()
 {
-    printf("Loop %i queued stop recording\n", m_id);
-    m_record_starting = false;
-    m_record_stopping = true;
+    if (!m_record_stopping) {
+        printf("Loop %i queued stop recording\n", m_id);
+        m_record_starting = false;
+        m_record_stopping = true;
+    }
 }
 
 void
 Loop::start_recording()
 {
-    printf("Loop %i started recording\n", m_id);
-    clear();
-    m_recording = true;
-    m_starttick = m_engine->m_tick;
+    if (!m_recording) {
+        printf("Loop %i started recording\n", m_id);
+        clear();
+        m_recording = true;
+        m_starttick = m_engine->m_tick;
+        push_undo();
+    }
 }
 
 void
 Loop::stop_recording()
 {
-    printf("Loop %i stopped recording\n", m_id);
-    m_recording = false;
-    link_notes();
+    if (m_recording) {
+        printf("Loop %i stopped recording\n", m_id);
+        m_recording = false;
+        link_notes();
+    }
 }
+
+void
+Loop::start_overdubbing()
+{
+    if (!m_overdubbing) {
+        printf("Loop %i started overdubbing\n", m_id);
+        m_overdubbing = true;
+        push_undo();
+    }
+}
+
+void
+Loop::stop_overdubbing()
+{
+    if (m_overdubbing) {
+        printf("Loop %i stopped overdubbing\n", m_id);
+        m_overdubbing = false;
+        link_notes();
+    }
+}
+
 
 void
 Loop::queue_start_playing()
@@ -131,38 +160,35 @@ Loop::queue_start_playing()
 void
 Loop::start_playing()
 {
-    printf("Loop %i started playing\n", m_id);
-    m_play_starting = false;
-    m_playing = true;
-    m_lasttick = m_engine->m_tick % m_length;
+    if (!m_playing) {
+        printf("Loop %i started playing\n", m_id);
+        m_play_starting = false;
+        m_playing = true;
+        m_lasttick = m_engine->m_tick % m_length;
+    }
 }
 
 void
 Loop::stop_playing()
 {
-    printf("Loop %i stopped playing\n", m_id);
-    m_playing = false;
-    m_play_starting = false;
-
-    // play noteoffs
-    for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
-        if (
-            (*i).get_timestamp() <= m_lasttick &&
-            (*i).m_event.type == SND_SEQ_EVENT_NOTEON &&
-            (*i).m_linked_event->get_timestamp() > m_lasttick
-        ) {
-            (*i).m_linked_event->send(m_alsa_seq, m_alsa_port);
-        } else if ((*i).get_timestamp() > m_lasttick) {
-            break;
-        }
+    if (m_playing) {
+        printf("Loop %i stopped playing\n", m_id);
+        m_playing = false;
+        m_play_starting = false;
+        notes_off();
     }
 }
 
 void
 Loop::link_notes()
 {
-    // link notes and add missing noteoffs
+    // unlink
+    for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
+        (*i).m_linked = false;
+        (*i).m_linked_event = NULL;
+    }
 
+    // link notes
     for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
         if ((*i).m_event.type == SND_SEQ_EVENT_NOTEON) {
             for (std::list <Event>::iterator j = m_events.begin(); j != m_events.end(); j++) {
@@ -170,26 +196,46 @@ Loop::link_notes()
                     (*j).m_event.type == SND_SEQ_EVENT_NOTEOFF &&
                     (*j).m_event.data.note.note == (*i).m_event.data.note.note &&
                     (*j).m_event.data.note.channel == (*i).m_event.data.note.channel &&
-                    !(*j).m_marked
+                    !(*j).m_linked && (*j) > (*i)
                 ) {
-                    (*j).m_marked = true;
+                    (*j).m_linked = true;
                     (*i).m_linked_event = &(*j);
                     break;
                 }
             }
-            if ((*i).m_linked_event == NULL) {
-                snd_seq_event_t noteoff = (*i).m_event;
-                noteoff.type = SND_SEQ_EVENT_NOTEOFF;
-                Event * event = new Event(noteoff);
-                event->set_timestamp(m_length - 1);
-                m_events.push_back(*event);
-                m_events.sort();
-                (*i).m_linked_event = event;
-            }
         }
     }
+
+    // insert missing note offs
     for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
-        if ((*i).m_marked) (*i).m_marked = false;
+        if ((*i).m_event.type == SND_SEQ_EVENT_NOTEON && (*i).m_linked_event == NULL) {
+            snd_seq_event_t noteoff = (*i).m_event;
+            noteoff.type = SND_SEQ_EVENT_NOTEOFF;
+            Event * event = new Event(noteoff);
+            event->set_timestamp(m_length - 1);
+            m_events.push_back(*event);
+            m_events.sort();
+            (*i).m_linked_event = event;
+        }
+    }
+
+}
+
+void
+Loop::notes_off()
+{
+    // play noteoffs
+    for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
+        if (
+            (*i).get_timestamp() <= m_lasttick &&
+            (*i).m_event.type == SND_SEQ_EVENT_NOTEON &&
+            (*i).m_linked_event->get_timestamp() > m_lasttick
+        ) {
+            if ((*i).m_linked_event->m_event.type != SND_SEQ_EVENT_NOTEOFF) printf("error\n");
+            (*i).m_linked_event->send(m_alsa_seq, m_alsa_port);
+        } else if ((*i).get_timestamp() > m_lasttick) {
+            break;
+        }
     }
 }
 
@@ -217,4 +263,49 @@ Loop::clear()
     m_record_starting = false;
     m_record_stopping = false;
     m_recording = false;
+    m_overdubbing = false;
+    while (!m_events_undo.empty()) {
+        m_events_undo.pop();
+    }
+    while (!m_events_redo.empty()) {
+        m_events_redo.pop();
+    }
+}
+
+void
+Loop::push_undo()
+{
+    if (m_events.size() != m_events_undo.top().size()) {
+        m_events_undo.push(m_events);
+        link_notes();
+        while (!m_events_redo.empty()) {
+            m_events_redo.pop();
+        }
+    }
+}
+
+void
+Loop::pop_undo()
+{
+    if (m_events_undo.size() > 0)
+    {
+        notes_off();
+        m_events_redo.push(m_events);
+        m_events = m_events_undo.top();
+        m_events_undo.pop();
+        link_notes();
+    }
+}
+
+void
+Loop::pop_redo()
+{
+    if (m_events_redo.size() > 0)
+    {
+        m_events_undo.push(m_events);
+        m_events = m_events_redo.top();
+        m_events_redo.pop();
+        link_notes();
+
+    }
 }

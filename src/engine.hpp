@@ -44,6 +44,7 @@ class Engine
 
         static int osc_hit_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data);
         static int osc_ctrl_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data);
+        static int osc_trig_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data);
 };
 
 #endif

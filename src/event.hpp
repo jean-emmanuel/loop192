@@ -12,7 +12,6 @@ class Event
         ~Event();
 
         long m_timestamp;
-        bool m_marked;
 
         void set_timestamp(long timestamp);
         long get_timestamp();
@@ -21,6 +20,7 @@ class Event
 
         snd_seq_event_t m_event;
         Event * m_linked_event;
+        bool m_linked;
 
         bool operator> (Event &event);
         bool operator< (Event &event);

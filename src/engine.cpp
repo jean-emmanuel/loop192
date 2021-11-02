@@ -15,6 +15,7 @@ Engine::Engine(int n_loops, const char* osc_in_port)
     m_bpm = Config::DEFAULT_BPM;
     set_measure_length(16);
 
+    m_tick = 0;
     struct timespec system_time;
     clock_gettime(CLOCK_REALTIME, &system_time);
     m_last_time = (system_time.tv_sec * 1000000) + (system_time.tv_nsec / 1000);
@@ -68,7 +69,7 @@ Engine::process()
         snd_seq_event_input(m_alsa_seq, &ev);
         // pass event to loop object
         for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
-            if ((*i).m_recording && (*i).m_alsa_port == ev->dest.port) {
+            if (((*i).m_recording || (*i).m_overdubbing) && (*i).m_alsa_port == ev->dest.port) {
                 (*i).record_event(*ev);
             }
         }
@@ -139,6 +140,7 @@ Engine::osc_init()
 
     }
     lo_server_thread_add_method(m_osc_server, "/set", "sf", Engine::osc_ctrl_handler, this);
+    lo_server_thread_add_method(m_osc_server, "/trig", NULL, Engine::osc_trig_handler, this);
 
     lo_server_thread_start(m_osc_server);
 
@@ -159,12 +161,19 @@ Engine::osc_hit_handler(const char *path, const char *types, lo_arg ** argv, int
     if (!strcmp(&argv[0]->s, "record")) {
         if ((*it).m_recording) (*it).queue_stop_recording();
         else (*it).queue_start_recording();
+    } else if (!strcmp(&argv[0]->s, "overdub")) {
+        if ((*it).m_overdubbing) (*it).stop_overdubbing();
+        else (*it).start_overdubbing();
     } else if (!strcmp(&argv[0]->s, "mute_off")) {
         (*it).start_playing();
     } else if (!strcmp(&argv[0]->s, "mute_on")) {
         (*it).stop_playing();
     } else if (!strcmp(&argv[0]->s, "clear")) {
         (*it).clear();
+    } else if (!strcmp(&argv[0]->s, "undo")) {
+        (*it).pop_undo();
+    } else if (!strcmp(&argv[0]->s, "redo")) {
+        (*it).pop_redo();
     }
 
     return 0;
@@ -184,13 +193,39 @@ Engine::osc_ctrl_handler(const char *path, const char *types, lo_arg ** argv, in
     return 0;
 }
 
+int
+Engine::osc_trig_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data)
+{
+    Engine *self = (Engine *)user_data;
+
+    self->m_tick = 0;
+    struct timespec system_time;
+    clock_gettime(CLOCK_REALTIME, &system_time);
+    self->m_last_time = (system_time.tv_sec * 1000000) + (system_time.tv_nsec / 1000);
+
+    for (std::list <Loop>::iterator i = self->m_loops.begin(); i != self->m_loops.end(); i++) {
+        if ((*i).m_playing) {
+            (*i).stop_playing();
+            (*i).start_playing();
+        }
+        if ((*i).m_recording) (*i).stop_recording();
+        if ((*i).m_overdubbing) (*i).stop_overdubbing();
+    }
+
+    return 0;
+}
+
 
 void
 Engine::set_measure_length(double eights)
 {
-    m_length = Config::PPQN * eights / 2;
-    for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
-        (*i).m_length = m_length;
+    int length = Config::PPQN * eights / 2;
+    if (length != m_length) {
+        m_length = length;
+        for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
+            (*i).clear();
+            (*i).m_length = m_length;
+        }
     }
 }
 

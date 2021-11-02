@@ -2,6 +2,7 @@
 #define MIDILOOPER_LOOP
 
 #include <list>
+#include <stack>
 
 #include <alsa/asoundlib.h>
 #include <alsa/seq_midi_event.h>
@@ -25,6 +26,10 @@ class Loop
         int m_alsa_port;
 
         std::list <Event> m_events;
+        std::stack <std::list <Event>> m_events_undo;
+        std::stack <std::list <Event>> m_events_redo;
+
+
         long m_tick;
         long m_length;
         long m_starttick;
@@ -35,8 +40,11 @@ class Loop
         bool m_recording;
         bool m_record_starting;
         bool m_record_stopping;
+        bool m_overdubbing;
 
         void process();
+        void record_event(snd_seq_event_t alsa_event);
+
         void queue_start_recording();
         void queue_stop_recording();
         void queue_start_playing();
@@ -44,9 +52,16 @@ class Loop
         void stop_recording();
         void start_playing();
         void stop_playing();
-        void record_event(snd_seq_event_t alsa_event);
+        void start_overdubbing();
+        void stop_overdubbing();
+
         void link_notes();
+        void notes_off();
         void clear();
+
+        void push_undo();
+        void pop_undo();
+        void pop_redo();
 
 };
 

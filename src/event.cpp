@@ -3,9 +3,8 @@
 Event::Event(snd_seq_event_t alsa_event)
 {
     m_event = alsa_event;
-    m_marked = false;
-    m_linked_event = NULL; // noteoff for noteons
-    
+    m_linked = false;
+    m_linked_event = NULL;
 }
 
 Event::~Event()

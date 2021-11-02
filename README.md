@@ -14,12 +14,18 @@ LOOPS COMMANDS:
     Where cmdname is one of the following:
 
     record
+    overdub
+    undo
+    redo
     mute_on
     mute_off
     clear
 
 
-GLOBAL PARAMETERS:
+GLOBAL COMMANDS:
+
+/trig
+    Reset playhead position 
 
 /set  s:param  f:value
     where param is one of:
