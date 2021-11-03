@@ -5,14 +5,12 @@
 #include "config.hpp"
 #include "engine.hpp"
 
-const char* optstring = "n:p:t:f:jvh";
+const char* optstring = "n:p:jvh";
 
 struct option long_options[] = {
     { "help", 0, 0, 'h' },
     { "n-loops", 1, 0, 'n' },
     { "osc-port", 1, 0, 'p' },
-    { "target-url", 1, 0, 't' },
-    { "feedback-url", 1, 0, 'f' },
     { "jack-transport", 0, 0, 'j' },
     { "version", 0, 0, 'v' },
     { 0, 0, 0, 0 }
@@ -26,8 +24,6 @@ static void usage(char *argv0)
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "  -n <int> , --n-loops=<int>       number of midi loops (default: %i)\n", DEFAULT_N_LOOPS);
     fprintf(stderr, "  -p <str> , --osc-port=<str>      udp in port number or unix socket path for OSC server (default: %s)\n", DEFAULT_OSC_PORT);
-    fprintf(stderr, "  -t <str> , --target-url=<str>    osc.udp or osc.unix target url for sequences messages (default: %s)\n", DEFAULT_TARGET_URL);
-    fprintf(stderr, "  -f <str> , --feedback-url=<str>  osc.udp or osc.unix target url for sequencer feedback\n");
     fprintf(stderr, "  -j , --jack-transport            follow jack transport\n");
     fprintf(stderr, "  -h , --help                      this usage output\n");
     fprintf(stderr, "  -v , --version                   show version only\n");
@@ -38,8 +34,6 @@ struct OptionInfo
     OptionInfo() :
         n_loops(DEFAULT_N_LOOPS),
         port(DEFAULT_OSC_PORT),
-        target(DEFAULT_TARGET_URL),
-        feedback(),
         jack_transport(0),
         show_usage(0),
         show_version(0) {}
@@ -82,17 +76,8 @@ static void parse_options (int argc, char **argv, OptionInfo & option_info)
         case 'p':
             option_info.port = optarg;
             break;
-        case 't':
-            option_info.target = optarg;
-            break;
-        case 'f':
-            option_info.feedback = optarg;
-            break;
         case 'j':
             option_info.jack_transport++;
-            break;
-        case 's':
-            option_info.stress_test++;
             break;
         default:
             // fprintf (stderr, "argument error: %d\n", c);

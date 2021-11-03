@@ -2,7 +2,6 @@
 #define MIDILOOPER_CONFIG
 
 #define DEFAULT_OSC_PORT "5244"
-#define DEFAULT_TARGET_URL "osc.udp://127.0.0.1:5245"
 #define DEFAULT_N_LOOPS 8
 #define BINARY_NAME "midilooper"
 #define CLIENT_NAME "MidiLooper"
