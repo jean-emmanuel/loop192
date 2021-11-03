@@ -35,7 +35,7 @@ Engine::~Engine()
     snd_seq_sync_output_queue(m_alsa_seq);
 
     m_alsa_seq = NULL;
-    lo_server_thread_free(m_osc_server);
+    lo_server_free(m_osc_server);
 }
 
 void
@@ -74,6 +74,9 @@ Engine::process()
             }
         }
     }
+
+    // receive osc events
+    while (lo_server_recv_noblock(m_osc_server, 0)) {}
 
     // flush midi output
     snd_seq_drain_output(m_alsa_seq);
@@ -126,9 +129,9 @@ Engine::osc_init()
     m_osc_proto = std::string(m_osc_port).find(std::string("osc.unix")) != std::string::npos ? LO_UNIX : LO_DEFAULT;
 
     if (m_osc_proto == LO_UNIX) {
-        m_osc_server = lo_server_thread_new_from_url(m_osc_port, osc_error);
+        m_osc_server = lo_server_new_from_url(m_osc_port, osc_error);
     } else {
-        m_osc_server = lo_server_thread_new(m_osc_port, osc_error);
+        m_osc_server = lo_server_new(m_osc_port, osc_error);
     }
 
     if (!m_osc_server) exit(1);
@@ -136,13 +139,11 @@ Engine::osc_init()
 
     for (int i = 0; i < m_n_loops; i++) {
         std::string path = "/ml/" + std::to_string(i) + "/hit";
-        lo_server_thread_add_method(m_osc_server, path.c_str(), "s", Engine::osc_hit_handler, this);
+        lo_server_add_method(m_osc_server, path.c_str(), "s", Engine::osc_hit_handler, this);
 
     }
-    lo_server_thread_add_method(m_osc_server, "/set", "sf", Engine::osc_ctrl_handler, this);
-    lo_server_thread_add_method(m_osc_server, "/trig", NULL, Engine::osc_trig_handler, this);
-
-    lo_server_thread_start(m_osc_server);
+    lo_server_add_method(m_osc_server, "/set", "sf", Engine::osc_ctrl_handler, this);
+    lo_server_add_method(m_osc_server, "/trig", NULL, Engine::osc_trig_handler, this);
 
 }
 
