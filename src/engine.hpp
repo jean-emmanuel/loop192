@@ -26,6 +26,9 @@ class Engine
         void set_measure_length(double eights);
         void set_bpm(double bpm);
 
+        void start();
+        void stop();
+
         const char * m_osc_port;
         lo_server m_osc_server;
         int m_osc_proto;
@@ -37,6 +40,7 @@ class Engine
 
         long long m_last_time;
         long m_tick;
+        bool m_playing;
         double m_bpm;
         int m_length;
         int m_n_loops;
@@ -44,7 +48,7 @@ class Engine
 
         static int osc_hit_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data);
         static int osc_ctrl_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data);
-        static int osc_trig_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data);
+        static int osc_cmd_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data);
 };
 
 #endif

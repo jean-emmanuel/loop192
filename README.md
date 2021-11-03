@@ -1,6 +1,6 @@
 # midilooper
 
-A minimal MIDI live looper that works like sooperlooper but with MIDI instead of audio.
+Minimal MIDI live looper that works like sooperlooper but with MIDI instead of audio.
 
 ## OSC
 ```
@@ -24,8 +24,11 @@ LOOP COMMANDS:
 
 GLOBAL COMMANDS:
 
-/trig
-    Reset playhead position
+/start
+    Start transport (reset playhead position to 0)
+
+/stop
+    Stop transport
 
 /set  s:param  f:value
     where param is one of:

@@ -9,16 +9,16 @@ Engine::Engine(int n_loops, const char* osc_in_port)
     m_osc_port = osc_in_port;
     m_n_loops = n_loops;
 
+    m_playing = true;
+    m_tick = 0;
+    m_bpm = Config::DEFAULT_BPM;
+    m_last_time = 0;
+
     midi_init();
     osc_init();
 
-    m_bpm = Config::DEFAULT_BPM;
     set_measure_length(16);
-
-    m_tick = 0;
-    struct timespec system_time;
-    clock_gettime(CLOCK_REALTIME, &system_time);
-    m_last_time = (system_time.tv_sec * 1000000) + (system_time.tv_nsec / 1000);
+    start();
 }
 
 Engine::~Engine()
@@ -56,7 +56,7 @@ Engine::process()
     // increment time
     m_last_time += ticks * tick_duration;
 
-    if (ticks > 0) {
+    if (m_playing && ticks > 0) {
         // process loops
         for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
             (*i).process();
@@ -143,7 +143,8 @@ Engine::osc_init()
 
     }
     lo_server_add_method(m_osc_server, "/set", "sf", Engine::osc_ctrl_handler, this);
-    lo_server_add_method(m_osc_server, "/trig", NULL, Engine::osc_trig_handler, this);
+    lo_server_add_method(m_osc_server, "/start", "", Engine::osc_cmd_handler, this);
+    lo_server_add_method(m_osc_server, "/stop", "", Engine::osc_cmd_handler, this);
 
 }
 
@@ -195,22 +196,14 @@ Engine::osc_ctrl_handler(const char *path, const char *types, lo_arg ** argv, in
 }
 
 int
-Engine::osc_trig_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data)
+Engine::osc_cmd_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data)
 {
     Engine *self = (Engine *)user_data;
 
-    self->m_tick = 0;
-    struct timespec system_time;
-    clock_gettime(CLOCK_REALTIME, &system_time);
-    self->m_last_time = (system_time.tv_sec * 1000000) + (system_time.tv_nsec / 1000);
-
-    for (std::list <Loop>::iterator i = self->m_loops.begin(); i != self->m_loops.end(); i++) {
-        if ((*i).m_playing) {
-            (*i).stop_playing();
-            (*i).start_playing();
-        }
-        if ((*i).m_recording) (*i).stop_recording();
-        if ((*i).m_overdubbing) (*i).stop_overdubbing();
+    if (!strcmp(path, "/start")) {
+        self->start();
+    } else if (!strcmp(path, "/stop")) {
+        self->stop();
     }
 
     return 0;
@@ -240,4 +233,37 @@ Engine::set_bpm(double bpm)
     } else {
         m_bpm = bpm;
     }
+}
+
+
+void
+Engine::start()
+{
+    printf("Engine transport started\n");
+
+    bool trig = m_playing;
+
+    m_playing = true;
+    m_tick = 0;
+    struct timespec system_time;
+    clock_gettime(CLOCK_REALTIME, &system_time);
+    m_last_time = (system_time.tv_sec * 1000000) + (system_time.tv_nsec / 1000);
+
+    if (trig) {
+        for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
+            if ((*i).m_playing) {
+                (*i).stop_playing();
+                (*i).start_playing();
+            }
+            if ((*i).m_recording) (*i).stop_recording();
+            if ((*i).m_overdubbing) (*i).stop_overdubbing();
+        }
+    }
+}
+
+void
+Engine::stop()
+{
+    printf("Engine transport stopped\n");
+    m_playing = false;
 }

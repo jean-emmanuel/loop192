@@ -110,6 +110,7 @@ Loop::queue_stop_recording()
 void
 Loop::start_recording()
 {
+    stop_overdubbing();
     if (!m_recording) {
         printf("Loop %i started recording\n", m_id);
         clear();
@@ -132,6 +133,7 @@ Loop::stop_recording()
 void
 Loop::start_overdubbing()
 {
+    stop_recording();
     if (!m_overdubbing) {
         printf("Loop %i started overdubbing\n", m_id);
         m_overdubbing = true;
