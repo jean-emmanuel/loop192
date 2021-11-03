@@ -38,7 +38,6 @@ class Engine
 
         const char * m_osc_port;
         lo_server m_osc_server;
-        int m_osc_proto;
 
         snd_seq_t * m_alsa_seq;
         int m_num_poll_descriptors;

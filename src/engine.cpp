@@ -122,9 +122,9 @@ void
 Engine::osc_init()
 {
 
-    m_osc_proto = std::string(m_osc_port).find(std::string("osc.unix")) != std::string::npos ? LO_UNIX : LO_DEFAULT;
+    int proto = std::string(m_osc_port).find(std::string("osc.unix")) != std::string::npos ? LO_UNIX : LO_DEFAULT;
 
-    if (m_osc_proto == LO_UNIX) {
+    if (proto == LO_UNIX) {
         m_osc_server = lo_server_new_from_url(m_osc_port, osc_error);
     } else {
         m_osc_server = lo_server_new(m_osc_port, osc_error);
@@ -141,6 +141,8 @@ Engine::osc_init()
     lo_server_add_method(m_osc_server, "/set", "sf", Engine::osc_ctrl_handler, this);
     lo_server_add_method(m_osc_server, "/start", "", Engine::osc_cmd_handler, this);
     lo_server_add_method(m_osc_server, "/stop", "", Engine::osc_cmd_handler, this);
+    lo_server_add_method(m_osc_server, "/status", "", Engine::osc_cmd_handler, this);
+    lo_server_add_method(m_osc_server, "/status", "s", Engine::osc_cmd_handler, this);
 
 }
 
@@ -202,6 +204,47 @@ Engine::osc_cmd_handler(const char *path, const char *types, lo_arg ** argv, int
     } else if (!strcmp(path, "/stop")) {
         if (self->m_jack_running) self->jack_stop();
         else self->stop();
+    } else if (!strcmp(path, "/status")) {
+
+        std::string json = "{";
+        json += "\"playing\":" + std::to_string(self->m_playing) + ",";
+        json += "\"tick\":" + std::to_string(self->m_tick) + ",";
+        json += "\"length\":" + std::to_string(self->m_length) + ",";
+        json += "\"bpm\":" + std::to_string(self->m_bpm) + ",";
+        json += "\"loops\":[";
+        for (std::list <Loop>::iterator i = self->m_loops.begin(); i != self->m_loops.end(); i++) {
+            json += "{";
+            json += "\"id\":" + std::to_string((*i).m_id) + ",";
+            json += "\"length\":" + std::to_string((*i).m_length) + ",";
+            json += "\"playing\":" + std::to_string((*i).m_playing) + ",";
+            json += "\"recording\":" + std::to_string((*i).m_recording) + ",";
+            json += "\"record_starting\":" + std::to_string((*i).m_record_starting) + ",";
+            json += "\"record_stopping\":" + std::to_string((*i).m_record_stopping) + ",";
+            json += "\"overdubbing\":" + std::to_string((*i).m_overdubbing);
+            json += "},";
+        }
+        json = json.substr(0, json.size() - 1);
+        json += "]}";
+
+        lo_address address;
+        if (argc == 1) {
+            address = lo_address_new_from_url(&argv[0]->s);
+            if (address == NULL) {
+                printf("Invalid osc address: %s\n", &argv[0]->s);
+                return 1;
+            }
+        } else {
+            address = lo_address_new_from_url(lo_address_get_url(lo_message_get_source(data)));
+            if (address == NULL) {
+                printf("Could not find origin osc address\n");
+                return 1;
+            }
+        }
+
+        lo_server from = lo_server_get_protocol(self->m_osc_server) == LO_UNIX ? NULL : self->m_osc_server;
+        lo_send_from(address, from, LO_TT_IMMEDIATE, "/status", "s", json.c_str());
+        lo_address_free(address);
+
     }
 
     return 0;
