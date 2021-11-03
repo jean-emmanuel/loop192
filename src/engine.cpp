@@ -47,12 +47,12 @@ Engine::process()
     // delta time to ticks
     double tick_duration = 1000000 * 60. / m_bpm / Config::PPQN;
     int ticks = (int)(delta_time / tick_duration);
-    m_tick += ticks;
 
     // increment time
     m_last_time += ticks * tick_duration;
 
     if (m_playing && ticks > 0) {
+        m_tick += ticks;
         // process loops
         for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
             (*i).process();
@@ -390,6 +390,7 @@ Engine::stop()
 {
     if (m_playing) {
         printf("Engine transport stopped\n");
+        m_tick = 0;
         m_playing = false;
         for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
             (*i).notes_off();
