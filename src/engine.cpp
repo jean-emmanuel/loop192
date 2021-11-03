@@ -9,7 +9,7 @@ Engine::Engine(int n_loops, const char* osc_in_port, bool jack_transport)
     m_osc_port = osc_in_port;
     m_n_loops = n_loops;
 
-    m_playing = true;
+    m_playing = false;
     m_tick = 0;
     m_bpm = Config::DEFAULT_BPM;
     m_last_time = 0;
@@ -298,7 +298,7 @@ Engine::start()
 {
     bool trig = m_playing;
 
-    if (!trig) {
+    if (trig) {
         printf("Engine transport restarted\n");
     } else {
         printf("Engine transport started\n");
