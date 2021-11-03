@@ -237,8 +237,6 @@ Loop::notes_off()
     for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
         if ((*i).m_event.type == SND_SEQ_EVENT_NOTEON && (*i).m_note_active) {
             (*i).m_linked_event->send(m_alsa_seq, m_alsa_port);
-        } else if ((*i).get_timestamp() > m_lasttick) {
-            break;
         }
     }
 }
