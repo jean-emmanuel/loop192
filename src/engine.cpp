@@ -60,7 +60,7 @@ Engine::process()
     }
 
     // receive midi events
-    while (poll( m_poll_descriptors, m_num_poll_descriptors, 0) > 0) {
+    while (poll(m_poll_descriptors, m_num_poll_descriptors, 0) > 0) {
         snd_seq_event_t *ev;
         snd_seq_event_input(m_alsa_seq, &ev);
         // pass event to loop object
@@ -88,7 +88,7 @@ Engine::midi_init()
     int ret = snd_seq_open(&m_alsa_seq, "default",  SND_SEQ_OPEN_DUPLEX, 0);
 
     if (ret < 0) {
-    	printf( "snd_seq_open() error\n");
+    	printf("snd_seq_open() error\n");
     	exit(1);
     }
 
@@ -258,7 +258,7 @@ Engine::jack_init()
 
     if (m_jack_client == 0)
     {
-        printf( "Jack server is not running.\n[Jack sync disabled]\n");
+        printf("Jack server is not running.\n[Jack sync disabled]\n");
         return;
     }
 
