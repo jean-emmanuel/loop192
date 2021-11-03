@@ -64,6 +64,7 @@ Loop::process()
     if (m_playing && !m_recording) {
 
         if (m_tick < m_lasttick) {
+            // in case we missed some events at the end of the loop
             for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
                 if ((*i).get_timestamp() > m_lasttick) {
                     (*i).send(m_alsa_seq, m_alsa_port);
@@ -262,6 +263,7 @@ Loop::record_event(snd_seq_event_t alsa_event)
 void
 Loop::clear()
 {
+    notes_off();
     m_events.clear();
     m_length = m_engine->m_length;
     m_record_starting = false;

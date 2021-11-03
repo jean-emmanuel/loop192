@@ -4,7 +4,7 @@
 #include "engine.hpp"
 #include "event.hpp"
 
-Engine::Engine(int n_loops, const char* osc_in_port)
+Engine::Engine(int n_loops, const char* osc_in_port, bool jack_transport)
 {
     m_osc_port = osc_in_port;
     m_n_loops = n_loops;
@@ -16,19 +16,15 @@ Engine::Engine(int n_loops, const char* osc_in_port)
 
     midi_init();
     osc_init();
+    if (jack_transport) jack_init();
 
-    set_measure_length(16);
-    start();
+    set_measure_length(Config::DEFAULT_8TH_PER_CYCLE);
 }
 
 Engine::~Engine()
 {
 
-    for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
-        if ((*i).m_playing) {
-            (*i).stop_playing();
-        }
-    }
+    stop();
 
     // flush midi output
     snd_seq_drain_output(m_alsa_seq);
@@ -201,9 +197,70 @@ Engine::osc_cmd_handler(const char *path, const char *types, lo_arg ** argv, int
     Engine *self = (Engine *)user_data;
 
     if (!strcmp(path, "/start")) {
-        self->start();
+        if (self->m_jack_running) self->jack_start();
+        else self->start();
     } else if (!strcmp(path, "/stop")) {
-        self->stop();
+        if (self->m_jack_running) self->jack_stop();
+        else self->stop();
+    }
+
+    return 0;
+}
+
+void
+Engine::jack_init()
+{
+
+    m_jack_client = jack_client_open("Midilooper", JackNullOption, NULL);
+
+    if (m_jack_client == 0)
+    {
+        printf( "Jack server is not running.\n[Jack sync disabled]\n");
+        return;
+    }
+
+    jack_on_shutdown(m_jack_client, Engine::jack_shutdown, this);
+    jack_set_process_callback(m_jack_client, Engine::jack_process_callback, this);
+
+    if (jack_activate(m_jack_client))
+    {
+        printf("Cannot register as Jack client\n");
+        return;
+    }
+
+    m_jack_running = true;
+}
+
+void
+Engine::jack_shutdown(void *user_data)
+{
+    Engine *self = (Engine *)user_data;
+    self->m_jack_running = false;
+    printf("Jack shut down. Jack transport sync disabled.\n");
+}
+
+int
+Engine::jack_process_callback(jack_nframes_t nframes, void* user_data)
+{
+    Engine *self = (Engine *)user_data;
+
+    jack_position_t pos;
+    jack_transport_state_t state = jack_transport_query(self->m_jack_client, &pos);
+
+    if (pos.beats_per_minute > Config::MIN_BPM) {
+        self->set_bpm(pos.beats_per_minute);
+    }
+
+    if (state == JackTransportRolling) {
+        if (!self->m_playing) {
+            printf("Jack transport is rolling\n");
+            self->start();
+        }
+    } else if (state == JackTransportStopped || state == JackTransportStarting) {
+        if (self->m_playing) {
+            printf("Jack transport is stopped\n");
+            self->stop();
+        }
     }
 
     return 0;
@@ -239,9 +296,13 @@ Engine::set_bpm(double bpm)
 void
 Engine::start()
 {
-    printf("Engine transport started\n");
-
     bool trig = m_playing;
+
+    if (!trig) {
+        printf("Engine transport restarted\n");
+    } else {
+        printf("Engine transport started\n");
+    }
 
     m_playing = true;
     m_tick = 0;
@@ -249,21 +310,46 @@ Engine::start()
     clock_gettime(CLOCK_REALTIME, &system_time);
     m_last_time = (system_time.tv_sec * 1000000) + (system_time.tv_nsec / 1000);
 
-    if (trig) {
-        for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
-            if ((*i).m_playing) {
-                (*i).stop_playing();
-                (*i).start_playing();
-            }
-            if ((*i).m_recording) (*i).stop_recording();
-            if ((*i).m_overdubbing) (*i).stop_overdubbing();
+    for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
+        if ((*i).m_playing) {
+            (*i).stop_playing();
+            (*i).start_playing();
         }
+        if ((*i).m_recording) (*i).stop_recording();
+        if ((*i).m_overdubbing) (*i).stop_overdubbing();
+    }
+
+}
+
+void
+Engine::jack_start()
+{
+    if (m_playing) {
+        printf("Jack transport restarted\n");
+        jack_transport_locate(m_jack_client, 0);
+    } else {
+        printf("Jack transport started\n");
+        jack_transport_start(m_jack_client);
     }
 }
+
+
+void
+Engine::jack_stop()
+{
+    printf("Jack transport stopped\n");
+    jack_transport_stop(m_jack_client);
+}
+
 
 void
 Engine::stop()
 {
-    printf("Engine transport stopped\n");
-    m_playing = false;
+    if (m_playing) {
+        printf("Engine transport stopped\n");
+        m_playing = false;
+        for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
+            (*i).notes_off();
+        }
+    }
 }

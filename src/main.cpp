@@ -16,6 +16,7 @@ struct option long_options[] = {
     { "osc-port", 1, 0, 'p' },
     { "target-url", 1, 0, 't' },
     { "feedback-url", 1, 0, 'f' },
+    { "jack-transport", 0, 0, 'j' },
     { "version", 0, 0, 'v' },
     { 0, 0, 0, 0 }
 };
@@ -30,6 +31,7 @@ static void usage(char *argv0)
     fprintf(stderr, "  -p <str> , --osc-port=<str>      udp in port number or unix socket path for OSC server (default: %s)\n", DEFAULT_OSC_PORT);
     fprintf(stderr, "  -t <str> , --target-url=<str>    osc.udp or osc.unix target url for sequences messages (default: %s)\n", DEFAULT_TARGET_URL);
     fprintf(stderr, "  -f <str> , --feedback-url=<str>  osc.udp or osc.unix target url for sequencer feedback\n");
+    fprintf(stderr, "  -j , --jack-transport            follow jack transport\n");
     fprintf(stderr, "  -h , --help                      this usage output\n");
     fprintf(stderr, "  -v , --version                   show version only\n");
 }
@@ -127,7 +129,7 @@ int main(int argc, char* argv[])
 
     parse_options (argc, argv, option_info);
 
-    Engine * engine = new Engine(option_info.n_loops, option_info.port);
+    Engine * engine = new Engine(option_info.n_loops, option_info.port, option_info.jack_transport);
 
     signal(SIGABRT, &sighandler);
     signal(SIGTERM, &sighandler);
