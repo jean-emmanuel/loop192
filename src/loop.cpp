@@ -189,19 +189,25 @@ Loop::link_notes()
     }
 
     // link notes
-    for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
-        if ((*i).m_event.type == SND_SEQ_EVENT_NOTEON) {
-            for (std::list <Event>::iterator j = m_events.begin(); j != m_events.end(); j++) {
+    for (std::list <Event>::iterator on = m_events.begin(); on != m_events.end(); on++) {
+        if ((*on).m_event.type == SND_SEQ_EVENT_NOTEON) {
+            std::list <Event>::iterator off = on;
+            off++;
+            while (off != on) {
                 if (
-                    (*j).m_event.type == SND_SEQ_EVENT_NOTEOFF &&
-                    (*j).m_event.data.note.note == (*i).m_event.data.note.note &&
-                    (*j).m_event.data.note.channel == (*i).m_event.data.note.channel &&
-                    !(*j).m_linked && (*j) > (*i)
+                    (*off).m_event.type == SND_SEQ_EVENT_NOTEOFF &&
+                    (*off).m_event.data.note.note == (*on).m_event.data.note.note &&
+                    (*off).m_event.data.note.channel == (*on).m_event.data.note.channel &&
+                    !(*off).m_linked
                 ) {
-                    (*j).m_linked = true;
-                    (*i).m_linked_event = &(*j);
+                    (*on).m_linked_event = &(*off);
+                    (*off).m_linked_event = &(*on);
+                    (*on).m_linked = true;
+                    (*off).m_linked = true;
                     break;
                 }
+                off++;
+                if (off == m_events.end()) off = m_events.begin();
             }
         }
     }
@@ -216,6 +222,9 @@ Loop::link_notes()
             m_events.push_back(*event);
             m_events.sort();
             (*i).m_linked_event = event;
+            event->m_linked_event = &(*i);
+            event->m_linked = true;
+            (*i).m_linked = true;
         }
     }
 
@@ -226,12 +235,7 @@ Loop::notes_off()
 {
     // play noteoffs
     for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
-        if (
-            (*i).get_timestamp() <= m_lasttick &&
-            (*i).m_event.type == SND_SEQ_EVENT_NOTEON &&
-            (*i).m_linked_event->get_timestamp() > m_lasttick
-        ) {
-            if ((*i).m_linked_event->m_event.type != SND_SEQ_EVENT_NOTEOFF) printf("error\n");
+        if ((*i).m_event.type == SND_SEQ_EVENT_NOTEON && (*i).m_note_active) {
             (*i).m_linked_event->send(m_alsa_seq, m_alsa_port);
         } else if ((*i).get_timestamp() > m_lasttick) {
             break;

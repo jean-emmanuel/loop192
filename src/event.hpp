@@ -21,6 +21,7 @@ class Event
         snd_seq_event_t m_event;
         Event * m_linked_event;
         bool m_linked;
+        bool m_note_active;
 
         bool operator> (Event &event);
         bool operator< (Event &event);

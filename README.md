@@ -4,7 +4,7 @@ A minimal MIDI live looper that works like sooperlooper but with MIDI instead of
 
 ## OSC
 ```
-LOOPS COMMANDS:
+LOOP COMMANDS:
 
 /ml/#/hit s:cmdname
     A single hit only, no press-release action
@@ -25,7 +25,7 @@ LOOPS COMMANDS:
 GLOBAL COMMANDS:
 
 /trig
-    Reset playhead position 
+    Reset playhead position
 
 /set  s:param  f:value
     where param is one of:
