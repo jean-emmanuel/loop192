@@ -258,7 +258,7 @@ Engine::jack_init()
 
     if (m_jack_client == 0)
     {
-        printf("Jack server is not running.\n[Jack sync disabled]\n");
+        printf("Jack server is not running. Jack transport sync disabled.\n");
         return;
     }
 
