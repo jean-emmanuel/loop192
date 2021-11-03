@@ -13,7 +13,7 @@ const char* optstring = "l:p:jnvh";
 
 struct option long_options[] = {
     { "help", 0, 0, 'h' },
-    { "loops", 1, 0, 'n' },
+    { "loops", 1, 0, 'l' },
     { "osc-port", 1, 0, 'p' },
     { "jack-transport", 0, 0, 'j' },
     { "no-gui", 0, 0, 'n' },
