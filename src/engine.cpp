@@ -92,7 +92,7 @@ Engine::midi_init()
     	exit(1);
     }
 
-    snd_seq_set_client_name(m_alsa_seq, Config::CLIENT_NAME);
+    snd_seq_set_client_name(m_alsa_seq, CLIENT_NAME);
 
 
     for (int i = 0; i < m_n_loops; i++) {
@@ -211,7 +211,7 @@ void
 Engine::jack_init()
 {
 
-    m_jack_client = jack_client_open("Midilooper", JackNullOption, NULL);
+    m_jack_client = jack_client_open(CLIENT_NAME, JackNullOption, NULL);
 
     if (m_jack_client == 0)
     {

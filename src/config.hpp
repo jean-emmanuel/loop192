@@ -1,6 +1,12 @@
 #ifndef MIDILOOPER_CONFIG
 #define MIDILOOPER_CONFIG
 
+#define DEFAULT_OSC_PORT "5244"
+#define DEFAULT_TARGET_URL "osc.udp://127.0.0.1:5245"
+#define DEFAULT_N_LOOPS 8
+#define BINARY_NAME "midilooper"
+#define CLIENT_NAME "MidiLooper"
+
 namespace Config
 {
 
@@ -10,9 +16,6 @@ namespace Config
 
     const int PPQN = 192;
     const int DEFAULT_8TH_PER_CYCLE = 8;
-
-    const char* BINARY_NAME = "midilooper";
-    const char* CLIENT_NAME = "MidiLooper";
 
 }
 

@@ -2,13 +2,10 @@
 #include <unistd.h>
 #include <getopt.h>
 
+#include "config.hpp"
 #include "engine.hpp"
 
-#define DEFAULT_OSC_PORT "5244"
-#define DEFAULT_TARGET_URL "osc.udp://127.0.0.1:5245"
-#define DEFAULT_N_LOOPS 8
-
-const char* optstring = "n:p:t:f:j:s:vh";
+const char* optstring = "n:p:t:f:jvh";
 
 struct option long_options[] = {
     { "help", 0, 0, 'h' },
@@ -23,8 +20,8 @@ struct option long_options[] = {
 
 static void usage(char *argv0)
 {
-    fprintf(stderr, "midilooper\n\n");
-
+    fprintf(stderr, BINARY_NAME);
+    fprintf(stderr, "\n\n");
     fprintf(stderr, "Usage: %s [options...]\n", argv0);
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "  -n <int> , --n-loops=<int>       number of midi loops (default: %i)\n", DEFAULT_N_LOOPS);
@@ -39,8 +36,13 @@ static void usage(char *argv0)
 struct OptionInfo
 {
     OptionInfo() :
-        n_loops(DEFAULT_N_LOOPS), port(DEFAULT_OSC_PORT), target(DEFAULT_TARGET_URL), feedback(), jack_transport(0),
-        show_usage(0), show_version(0) {}
+        n_loops(DEFAULT_N_LOOPS),
+        port(DEFAULT_OSC_PORT),
+        target(DEFAULT_TARGET_URL),
+        feedback(),
+        jack_transport(0),
+        show_usage(0),
+        show_version(0) {}
 
     int n_loops;
 
@@ -93,7 +95,7 @@ static void parse_options (int argc, char **argv, OptionInfo & option_info)
             option_info.stress_test++;
             break;
         default:
-            fprintf (stderr, "argument error: %d\n", c);
+            // fprintf (stderr, "argument error: %d\n", c);
             option_info.show_usage++;
             break;
         }
@@ -109,7 +111,8 @@ static void parse_options (int argc, char **argv, OptionInfo & option_info)
     }
 
     if (option_info.show_version) {
-        fprintf(stdout, "midilooper version %s\n", "0.0.0");
+        fprintf(stdout, BINARY_NAME);
+        fprintf(stdout, " version %s\n", "0.0.0");
         exit(0);
     }
 }
