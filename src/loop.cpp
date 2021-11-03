@@ -17,7 +17,7 @@ Loop::Loop(Engine * engine, int id, snd_seq_t * seq, int port)
 
     m_lasttick = 0;
     m_starttick = 0;
-    m_length = 0;
+    m_length = 1;
 }
 
 Loop::~Loop()

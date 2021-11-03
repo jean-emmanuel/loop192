@@ -1,17 +1,22 @@
 #include <signal.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <pthread.h>
 
 #include "config.hpp"
 #include "engine.hpp"
 
-const char* optstring = "n:p:jvh";
+#include "gui_window.hpp"
+#include <gtkmm.h>
+
+const char* optstring = "l:p:jnvh";
 
 struct option long_options[] = {
     { "help", 0, 0, 'h' },
-    { "n-loops", 1, 0, 'n' },
+    { "loops", 1, 0, 'n' },
     { "osc-port", 1, 0, 'p' },
     { "jack-transport", 0, 0, 'j' },
+    { "no-gui", 0, 0, 'n' },
     { "version", 0, 0, 'v' },
     { 0, 0, 0, 0 }
 };
@@ -22,9 +27,10 @@ static void usage(char *argv0)
     fprintf(stderr, "\n\n");
     fprintf(stderr, "Usage: %s [options...]\n", argv0);
     fprintf(stderr, "Options:\n");
-    fprintf(stderr, "  -n <int> , --n-loops=<int>       number of midi loops (default: %i)\n", DEFAULT_N_LOOPS);
+    fprintf(stderr, "  -l <int> , --loops=<int>         number of midi loops (default: %i)\n", DEFAULT_N_LOOPS);
     fprintf(stderr, "  -p <str> , --osc-port=<str>      udp in port number or unix socket path for OSC server (default: %s)\n", DEFAULT_OSC_PORT);
     fprintf(stderr, "  -j , --jack-transport            follow jack transport\n");
+    fprintf(stderr, "  -n , --no-gui                    headless mode\n");
     fprintf(stderr, "  -h , --help                      this usage output\n");
     fprintf(stderr, "  -v , --version                   show version only\n");
 }
@@ -35,6 +41,7 @@ struct OptionInfo
         n_loops(DEFAULT_N_LOOPS),
         port(DEFAULT_OSC_PORT),
         jack_transport(0),
+        no_gui(0),
         show_usage(0),
         show_version(0) {}
 
@@ -45,6 +52,7 @@ struct OptionInfo
     const char* feedback;
 
     int jack_transport;
+    int no_gui;
 
     int show_usage;
     int show_version;
@@ -71,13 +79,16 @@ static void parse_options (int argc, char **argv, OptionInfo & option_info)
         case 'v':
             option_info.show_version++;
             break;
-        case 'n':
+        case 'l':
             option_info.n_loops = atoi(optarg);
         case 'p':
             option_info.port = optarg;
             break;
         case 'j':
             option_info.jack_transport++;
+            break;
+        case 'n':
+            option_info.no_gui++;
             break;
         default:
             // fprintf (stderr, "argument error: %d\n", c);
@@ -102,12 +113,37 @@ static void parse_options (int argc, char **argv, OptionInfo & option_info)
     }
 }
 
+Glib::RefPtr<Gtk::Application> application;
 
 bool run = true;
+
+pthread_t thread;
+bool thread_launched;
+void* main_loop(void *arg)
+{
+    Engine * engine = (Engine *)arg;
+
+    struct timespec ts = {
+        .tv_sec = 0,
+        .tv_nsec = 1000000
+    };
+
+    while (run) {
+        engine->process();
+        nanosleep(&ts, NULL);
+    }
+
+    return 0;
+}
 
 void sighandler(int sig)
 {
     run = false;
+    if (thread_launched) {
+        pthread_join(thread, NULL);
+        thread_launched = false;
+        application->quit();
+    }
 }
 
 int main(int argc, char* argv[])
@@ -123,14 +159,19 @@ int main(int argc, char* argv[])
     signal(SIGTERM, &sighandler);
     signal(SIGINT, &sighandler);
 
-    struct timespec ts = {
-        .tv_sec = 0,
-        .tv_nsec = 1000000
-    };
 
-    while (run) {
-        engine->process();
-        nanosleep(&ts, NULL);
+    if (option_info.no_gui) {
+        main_loop((void *)engine);
+    } else {
+        pthread_create(&thread, NULL, main_loop, engine);
+        thread_launched = true;
+        application = Gtk::Application::create();
+        MainWindow window(engine);
+        application->run(window);
+        if (thread_launched) {
+            run = false;
+            pthread_join(thread, NULL);
+        }
     }
 
     delete engine;

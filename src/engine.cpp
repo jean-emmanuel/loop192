@@ -13,6 +13,7 @@ Engine::Engine(int n_loops, const char* osc_in_port, bool jack_transport)
     m_tick = 0;
     m_bpm = Config::DEFAULT_BPM;
     m_last_time = 0;
+    m_jack_running = false;
 
     midi_init();
     osc_init();
