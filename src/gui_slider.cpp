@@ -1,3 +1,5 @@
+#include "config.hpp"
+
 #include "gui_slider.hpp"
 #include "gui_style.h"
 
@@ -34,7 +36,29 @@ LoopSlider::draw_background()
     cr->paint_with_alpha(1.0);
     cr->set_operator(Cairo::OPERATOR_OVER);
 
+
+
+    cr->set_line_width(1.0);
     auto color = c_color_text;
+    for (int i = 0; i < m_loop->m_length; i+= Config::PPQN / 4){
+        if (i % m_loop->m_engine->m_length == 0) {
+            cr->set_source_rgba(color.get_red(), color.get_green(), color.get_blue(), 0.4);
+        } else if (i % Config::PPQN == 0) {
+            cr->set_source_rgba(color.get_red(), color.get_green(), color.get_blue(), 0.2);
+        } else if (i % (Config::PPQN / 4) == 0) {
+            cr->set_source_rgba(color.get_red(), color.get_green(), color.get_blue(), 0.1);
+        } else {
+            continue;
+        }
+        int x = i * width / m_loop->m_length;
+        cr->move_to(x - 0.5, 0);
+        cr->line_to(x - 0.5, height);
+        cr->stroke();
+    }
+
+
+
+    color = c_color_text;
     cr->set_source_rgb(color.get_red(), color.get_green(), color.get_blue());
 
     int length = m_loop->m_length;
