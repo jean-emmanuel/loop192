@@ -56,10 +56,8 @@ LoopSlider::draw_background()
         cr->stroke();
     }
 
-
-
     color = c_color_text;
-    cr->set_source_rgb(color.get_red(), color.get_green(), color.get_blue());
+    cr->set_source_rgba(color.get_red(), color.get_green(), color.get_blue(), 1.0);
 
     int length = m_loop->m_length;
     int max_y = 0;
@@ -132,8 +130,8 @@ LoopSlider::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     auto color = c_color_primary;
     cr->set_source_rgb(color.get_red(), color.get_green(), color.get_blue());
     cr->set_line_width(1.0);
-    cr->move_to(x, 0);
-    cr->line_to(x, height);
+    cr->move_to(x - 0.5, 0);
+    cr->line_to(x - 0.5, height);
     cr->stroke();
 
     return true;
