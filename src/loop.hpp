@@ -42,6 +42,8 @@ class Loop
         bool m_record_stopping;
         bool m_overdubbing;
 
+        int m_dirty;
+
         void process();
         void record_event(snd_seq_event_t alsa_event);
 
@@ -55,7 +57,7 @@ class Loop
         void start_overdubbing();
         void stop_overdubbing();
 
-        void link_notes();
+        void link_notes(bool reset = false);
         void notes_off();
         void clear();
 

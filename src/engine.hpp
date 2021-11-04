@@ -40,9 +40,6 @@ class Engine
         lo_server m_osc_server;
 
         snd_seq_t * m_alsa_seq;
-        int m_num_poll_descriptors;
-        struct pollfd *m_poll_descriptors;
-
 
         long long m_last_time;
         long m_tick;

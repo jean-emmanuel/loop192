@@ -11,15 +11,18 @@ Engine::Engine(int n_loops, const char* osc_in_port, bool jack_transport)
 
     m_playing = false;
     m_tick = 0;
-    m_bpm = Config::DEFAULT_BPM;
+    m_bpm = 0;
     m_last_time = 0;
     m_jack_running = false;
+    m_length = 0;
+
+    set_bpm(Config::DEFAULT_BPM);
+    set_measure_length(Config::DEFAULT_8TH_PER_CYCLE);
 
     midi_init();
     osc_init();
-    if (jack_transport) jack_init();
 
-    set_measure_length(Config::DEFAULT_8TH_PER_CYCLE);
+    if (jack_transport) jack_init();
 }
 
 Engine::~Engine()
@@ -61,7 +64,7 @@ Engine::process()
     }
 
     // receive midi events
-    while (poll(m_poll_descriptors, m_num_poll_descriptors, 0) > 0) {
+    while (snd_seq_event_input_pending(m_alsa_seq, 1)) {
         snd_seq_event_t *ev;
         snd_seq_event_input(m_alsa_seq, &ev);
         // pass event to loop object
@@ -80,7 +83,6 @@ Engine::process()
     snd_seq_sync_output_queue(m_alsa_seq);
 
 }
-
 
 void
 Engine::midi_init()
@@ -107,10 +109,6 @@ Engine::midi_init()
         m_loops.push_back(loop);
 
     }
-
-    m_num_poll_descriptors = snd_seq_poll_descriptors_count(m_alsa_seq, POLLIN);
-    m_poll_descriptors = new pollfd[m_num_poll_descriptors];
-    snd_seq_poll_descriptors(m_alsa_seq, m_poll_descriptors, m_num_poll_descriptors, POLLIN);
 
 }
 
@@ -357,7 +355,7 @@ Engine::start()
     for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
         if ((*i).m_playing) {
             (*i).stop_playing();
-            (*i).start_playing();
+            (*i).queue_start_playing();
         }
         if ((*i).m_recording) (*i).stop_recording();
         if ((*i).m_overdubbing) (*i).stop_overdubbing();

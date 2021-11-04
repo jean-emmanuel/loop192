@@ -5,12 +5,15 @@ LoopSlider::LoopSlider(Loop * loop)
 {
     m_loop = loop;
 
+    m_dirty = 0;
+
     Gtk::Allocation allocation = get_allocation();
     m_surface = Cairo::ImageSurface::create(
         Cairo::Format::FORMAT_ARGB32,
         allocation.get_width(),
         allocation.get_height()
     );
+
 }
 
 LoopSlider::~LoopSlider()
@@ -26,6 +29,10 @@ LoopSlider::draw_background()
     const int width = allocation.get_width();
     const int height = allocation.get_height();
 
+    cr->set_operator(Cairo::OPERATOR_CLEAR);
+    cr->rectangle(-1, -1, width + 2, height + 2);
+    cr->paint_with_alpha(1.0);
+    cr->set_operator(Cairo::OPERATOR_OVER);
 
     auto color = c_color_text;
     cr->set_source_rgb(color.get_red(), color.get_green(), color.get_blue());
@@ -62,6 +69,8 @@ LoopSlider::draw_background()
 
     cr->stroke();
 
+    m_dirty = m_loop->m_dirty;
+
 }
 
 
@@ -84,7 +93,7 @@ LoopSlider::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         newsurface = true;
     }
 
-    if (!newsurface) // TODO && loop changed
+    if (!newsurface && m_dirty != m_loop->m_dirty) // TODO && loop changed
     {
         draw_background();
     }
@@ -94,7 +103,7 @@ LoopSlider::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     cr->paint();
 
     // draw marker
-    int x = width * m_loop->m_lasttick / m_loop->m_length;
+    int x = 2 + (width - 4) * m_loop->m_lasttick / m_loop->m_length;
     // if (!m_loop->m_playing && !m_loop->m_recording) x = 0;
     auto color = c_color_primary;
     cr->set_source_rgb(color.get_red(), color.get_green(), color.get_blue());

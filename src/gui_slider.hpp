@@ -17,6 +17,8 @@ class LoopSlider : public DrawingArea {
         Loop            *m_loop;
         Cairo::RefPtr<Cairo::ImageSurface> m_surface;
 
+        int              m_dirty;
+
         void draw_background();
 
     protected:

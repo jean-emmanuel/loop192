@@ -13,7 +13,7 @@ MainWindow::MainWindow(Engine * engine)
     add(m_scroll);
     m_scroll.add(m_vbox);
 
-    m_vbox.set_spacing(2);
+    m_vbox.set_spacing(1);
     for (std::list <Loop>::iterator i = engine->m_loops.begin(); i != engine->m_loops.end(); i++) {
         LoopWidget * w = new LoopWidget(&(*i));
         m_vbox.pack_start(*w, false, false);
