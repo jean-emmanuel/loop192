@@ -20,6 +20,7 @@ Event::Event(snd_seq_event_t alsa_event)
     m_linked = false;
     m_linked_event = NULL;
     m_note_active = false;
+    m_timestamp = 0;
 }
 
 Event::~Event()

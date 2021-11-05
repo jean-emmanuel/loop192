@@ -45,6 +45,7 @@ class Loop
         bool m_has_undo;
         bool m_has_redo;
 
+
         long m_tick;
         long m_length;
         long m_starttick;
@@ -54,12 +55,18 @@ class Loop
         bool m_play_starting;
 
         bool m_mute;
+
         bool m_recording;
         bool m_record_starting;
         bool m_record_stopping;
+
         bool m_overdubbing;
 
-        int m_dirty;
+        bool m_queue_overdub_start;
+        bool m_queue_overdub_stop;
+        bool m_queue_undo;
+        bool m_queue_redo;
+        int  m_dirty;
 
         void process();
         void record_event(snd_seq_event_t alsa_event);

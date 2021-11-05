@@ -25,7 +25,6 @@ Loop::Loop(Engine * engine, int id, snd_seq_t * seq, int port)
     m_overdubbing = false;
     m_mute = false;
 
-    m_play_starting = false;
     m_record_starting = false;
     m_record_stopping = false;
 
@@ -36,6 +35,10 @@ Loop::Loop(Engine * engine, int id, snd_seq_t * seq, int port)
     m_dirty = 0;
     m_has_undo = false;
     m_has_redo = false;
+    m_queue_undo = false;
+    m_queue_redo = false;
+    m_queue_overdub_start = false;
+    m_queue_overdub_stop = false;
 }
 
 Loop::~Loop()
@@ -79,7 +82,7 @@ Loop::process()
     // output events
     if (!m_recording && !m_mute && m_events.size() > 0) {
 
-        if (m_tick < m_lasttick && !m_play_starting) {
+        if (m_tick < m_lasttick) {
             // in case we missed some events at the end of the loop
             for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
                 if ((*i).get_timestamp() > m_lasttick) {
@@ -100,6 +103,12 @@ Loop::process()
     }
 
     m_lasttick = m_tick;
+
+    // thread safe ui callbacks
+    if (m_queue_undo) pop_undo();
+    if (m_queue_redo) pop_redo();
+    if (m_queue_overdub_start) start_overdubbing();
+    if (m_queue_overdub_stop) stop_overdubbing();
 
 }
 
@@ -157,6 +166,7 @@ Loop::start_overdubbing()
         m_overdubbing = true;
         push_undo();
     }
+    m_queue_overdub_start = false;
 }
 
 void
@@ -167,6 +177,7 @@ Loop::stop_overdubbing()
         m_overdubbing = false;
         link_notes(true);
     }
+    m_queue_overdub_stop = false;
 }
 
 void
@@ -315,7 +326,7 @@ Loop::pop_undo()
         m_has_redo = true;
     }
     if (m_events_undo.size() == 0) m_has_undo = false;
-
+    m_queue_undo = false;
 }
 
 void
@@ -331,4 +342,5 @@ Loop::pop_redo()
         m_has_undo = true;
     }
     if (m_events_redo.size() == 0) m_has_redo = false;
+    m_queue_redo = false;
 }

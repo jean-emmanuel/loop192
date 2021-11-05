@@ -109,6 +109,10 @@ button.on {
     color: @color_primary;
 }
 
+button.record.on {
+    color: @color_record;
+}
+
 button:disabled {
     opacity: 0.75
 }

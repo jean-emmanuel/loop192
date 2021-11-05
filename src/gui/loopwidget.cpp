@@ -23,6 +23,12 @@ LoopWidget::LoopWidget(Loop * loop) : m_timeline(loop)
 
     set_orientation(Gtk::Orientation::ORIENTATION_HORIZONTAL);
 
+    pack_start(m_label, false, false);
+    m_label.set_label(std::to_string(m_loop->m_id));
+    m_label.set_sensitive(false);
+    m_label.get_style_context()->add_class("label");
+    m_label.set_size_request(60, 0);
+
     pack_start(m_vbox1, false, false);
     m_vbox1.set_orientation(Gtk::Orientation::ORIENTATION_VERTICAL);
     m_vbox1.set_homogeneous(true);
@@ -71,8 +77,8 @@ LoopWidget::LoopWidget(Loop * loop) : m_timeline(loop)
     });
 
     m_overdub.signal_clicked().connect([&]{
-        if (m_loop->m_overdubbing) m_loop->stop_overdubbing();
-        else m_loop->start_overdubbing();
+        if (m_loop->m_overdubbing) m_loop->m_queue_overdub_stop = true;
+        else m_loop->m_queue_overdub_start = true;
     });
 
     m_mute.signal_clicked().connect([&]{
@@ -80,11 +86,11 @@ LoopWidget::LoopWidget(Loop * loop) : m_timeline(loop)
     });
 
     m_undo.signal_clicked().connect([&]{
-        m_loop->pop_undo();
+        m_loop->m_queue_undo = true;
     });
 
     m_redo.signal_clicked().connect([&]{
-        m_loop->pop_redo();
+        m_loop->m_queue_redo = true;
     });
 
 }
@@ -98,7 +104,7 @@ void
 LoopWidget::timer_callback()
 {
     // update timeline
-    m_timeline.queue_draw();
+    m_timeline.update();
 
     if (m_loop->m_recording != m_record_state) {
         m_record_state = m_loop->m_recording;

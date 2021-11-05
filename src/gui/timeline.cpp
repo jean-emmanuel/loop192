@@ -22,6 +22,8 @@ Timeline::Timeline(Loop * loop)
     m_loop = loop;
 
     m_dirty = 0;
+    m_last_marker_pos = 0;
+    m_marker_speed = 0;
 
     Gtk::Allocation allocation = get_allocation();
     m_surface = Cairo::ImageSurface::create(
@@ -153,5 +155,28 @@ Timeline::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     cr->line_to(x - 0.5, height);
     cr->stroke();
 
+    m_last_marker_pos = x;
+
     return true;
+}
+
+void
+Timeline::update()
+{
+    if (m_dirty != m_loop->m_dirty) {
+        queue_draw();
+    } else {
+        Gtk::Allocation allocation = get_allocation();
+        const int height = allocation.get_height();
+        const int width = allocation.get_width();
+        // attempt to predict where the marker will be when the drawing occurs
+        // and invalidate the smallest area to save cpu
+        // TODO: find a better way
+        int x = 2 + (width - 4) * m_loop->m_lasttick / m_loop->m_length;
+        if (x > m_last_marker_pos) {
+            queue_draw_area(m_last_marker_pos - 100, 0, 200, height);
+        } else if (x < m_last_marker_pos) {
+            queue_draw();
+        }
+    }
 }

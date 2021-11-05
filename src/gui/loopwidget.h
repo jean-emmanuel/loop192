@@ -37,6 +37,7 @@ class LoopWidget : public Box {
         Box              m_vbox3;
         Timeline         m_timeline;
 
+        Label            m_label;
         Button           m_undo;
         Button           m_redo;
         Button           m_record;

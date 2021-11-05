@@ -162,6 +162,7 @@ void
 MainWindow::clear_focus()
 {
     m_toolbar_bpm.select_region(0, 0);
+    m_toolbar_length.select_region(0, 0);
     m_scroll.set_can_focus(true);
     m_scroll.grab_focus();
     m_scroll.set_can_focus(false);

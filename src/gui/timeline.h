@@ -32,8 +32,11 @@ class Timeline : public DrawingArea {
         Cairo::RefPtr<Cairo::ImageSurface> m_surface;
 
         int              m_dirty;
+        int              m_last_marker_pos;
+        int              m_marker_speed;
 
         void draw_background();
+        void update();
 
     protected:
 
