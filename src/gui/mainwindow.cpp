@@ -71,6 +71,7 @@ MainWindow::MainWindow(Engine * engine)
 
     m_vbox.add(m_scroll);
     m_scroll.add(m_loops);
+    m_scroll.set_overlay_scrolling(false);
     m_loops.set_spacing(1);
     for (std::list <Loop>::iterator i = engine->m_loops.begin(); i != engine->m_loops.end(); i++) {
         LoopWidget * w = new LoopWidget(&(*i));
