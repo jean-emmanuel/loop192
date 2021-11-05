@@ -37,6 +37,8 @@ class Loop
 
         bool m_playing;
         bool m_play_starting;
+
+        bool m_mute;
         bool m_recording;
         bool m_record_starting;
         bool m_record_stopping;

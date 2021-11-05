@@ -164,9 +164,10 @@ Engine::osc_hit_handler(const char *path, const char *types, lo_arg ** argv, int
         if ((*it).m_overdubbing) (*it).stop_overdubbing();
         else (*it).start_overdubbing();
     } else if (!strcmp(&argv[0]->s, "mute_off")) {
-        (*it).start_playing();
+        (*it).m_mute = false;
     } else if (!strcmp(&argv[0]->s, "mute_on")) {
-        (*it).stop_playing();
+        (*it).m_mute = true;
+        (*it).notes_off();
     } else if (!strcmp(&argv[0]->s, "clear")) {
         (*it).clear();
     } else if (!strcmp(&argv[0]->s, "undo")) {

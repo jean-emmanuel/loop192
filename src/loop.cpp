@@ -10,6 +10,7 @@ Loop::Loop(Engine * engine, int id, snd_seq_t * seq, int port)
     m_recording = false;
     m_overdubbing = false;
     m_playing = false;
+    m_mute = false;
 
     m_play_starting = false;
     m_record_starting = false;
@@ -62,7 +63,7 @@ Loop::process()
     }
 
     // output events
-    if (m_playing && !m_recording) {
+    if (m_playing && !m_recording && !m_mute) {
 
         if (m_tick < m_lasttick && !m_play_starting) {
             // in case we missed some events at the end of the loop
