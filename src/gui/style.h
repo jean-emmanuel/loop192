@@ -27,7 +27,12 @@ const Gdk::RGBA c_color_text_hilight = Gdk::RGBA("#ffffff");
 const Gdk::RGBA c_color_primary = Gdk::RGBA("rgb(117, 170, 229)");
 const Gdk::RGBA c_color_secondary = Gdk::RGBA("rgb(229, 170, 117)");
 
-// Main window
+const Gdk::RGBA c_color_record = Gdk::RGBA("rgb(229, 20, 20)");
+const Gdk::RGBA c_color_mute = Gdk::RGBA("rgb(229, 215, 20)");
+
+// toolbar
+const int c_toolbar_spacing = 10;
+
 const std::string c_mainwindow_css = "\
 @define-color color_bg " + c_color_background.to_string() + ";\
 @define-color color_fg " + c_color_foreground.to_string() + ";\
@@ -36,6 +41,8 @@ const std::string c_mainwindow_css = "\
 @define-color color_text_hilight " + c_color_text_hilight.to_string() + ";\
 @define-color color_primary " + c_color_primary.to_string() + ";\
 @define-color color_secondary " + c_color_secondary.to_string() + ";\
+@define-color color_record " + c_color_record.to_string() + ";\
+@define-color color_mute " + c_color_mute.to_string() + ";\
 " + R"CSS(
 
 /* reset */
@@ -77,6 +84,14 @@ overshoot, undershoot {
     background: none;
 }
 
+/* toolbar */
+
+.toolbar {
+    background: @color_fg;
+    padding: 10px;
+    border-bottom: 1px solid @color_bg
+}
+
 /* widgets */
 
 button {
@@ -86,12 +101,16 @@ button {
     padding: 2px 10px;
 }
 
-button:hover {
-    opacity: 0.8
-}
-
 button:active {
     opacity: 0.6
+}
+
+button.on {
+    color: @color_primary;
+}
+
+button:disabled {
+    opacity: 0.75
 }
 
 .loopwidget {

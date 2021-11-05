@@ -33,6 +33,18 @@ class MainWindow : public Window {
         Engine                *m_engine;
         ScrolledWindow         m_scroll;
         VBox                   m_vbox;
+        HBox                   m_toolbar;
+        VBox                   m_loops;
+
+        Button                 m_toolbar_panic;
+        Button                 m_toolbar_play;
+        Button                 m_toolbar_stop;
+        Entry                  m_toolbar_tempo;
+        Entry                  m_toolbar_length;
+        Image                  m_toolbar_logo;
+
+        bool                   m_toolbar_play_state;
+
 
         bool timer_callback();
 

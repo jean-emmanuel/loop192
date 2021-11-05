@@ -23,7 +23,6 @@ Loop::Loop(Engine * engine, int id, snd_seq_t * seq, int port)
 
     m_recording = false;
     m_overdubbing = false;
-    m_playing = false;
     m_mute = false;
 
     m_play_starting = false;
@@ -35,6 +34,8 @@ Loop::Loop(Engine * engine, int id, snd_seq_t * seq, int port)
     m_length = engine->m_length;
 
     m_dirty = 0;
+    m_has_undo = false;
+    m_has_redo = false;
 }
 
 Loop::~Loop()
@@ -56,7 +57,7 @@ Loop::process()
             if (m_record_stopping) {
                 // stop recording
                 stop_recording();
-                queue_start_playing();
+                m_tick = m_tick - m_length;
             } else {
                 // expand loop length (+1 measure)
                 m_length += m_engine->m_length;
@@ -70,14 +71,13 @@ Loop::process()
         m_tick = (global_tick - m_starttick) % m_length;
 
         if (m_record_starting && m_tick < m_lasttick) {
-            m_record_starting = false;
             start_recording();
         }
 
     }
 
     // output events
-    if (m_playing && !m_recording && !m_mute) {
+    if (!m_recording && !m_mute && m_events.size() > 0) {
 
         if (m_tick < m_lasttick && !m_play_starting) {
             // in case we missed some events at the end of the loop
@@ -99,8 +99,6 @@ Loop::process()
 
     }
 
-    if (m_tick < m_lasttick && m_play_starting) start_playing();
-
     m_lasttick = m_tick;
 
 }
@@ -108,7 +106,6 @@ Loop::process()
 void
 Loop::queue_start_recording()
 {
-    stop_playing();
     if (!m_record_starting) {
         printf("Loop %i queued start recording\n", m_id);
         m_record_starting = true;
@@ -130,6 +127,7 @@ void
 Loop::start_recording()
 {
     stop_overdubbing();
+    m_record_starting = false;
     if (!m_recording) {
         printf("Loop %i started recording\n", m_id);
         clear();
@@ -142,6 +140,7 @@ Loop::start_recording()
 void
 Loop::stop_recording()
 {
+    m_record_stopping = false;
     if (m_recording) {
         printf("Loop %i stopped recording\n", m_id);
         m_recording = false;
@@ -170,35 +169,11 @@ Loop::stop_overdubbing()
     }
 }
 
-
 void
-Loop::queue_start_playing()
+Loop::set_mute(bool mute)
 {
-    m_play_starting = true;
-}
-
-
-void
-Loop::start_playing()
-{
-    if (!m_playing) {
-        printf("Loop %i started playing\n", m_id);
-        m_play_starting = false;
-        m_playing = true;
-        m_starttick = m_engine->m_tick;
-        m_lasttick = m_engine->m_tick % m_length;
-    }
-}
-
-void
-Loop::stop_playing()
-{
-    if (m_playing) {
-        printf("Loop %i stopped playing\n", m_id);
-        m_playing = false;
-        m_play_starting = false;
-        notes_off();
-    }
+    m_mute = mute;
+    if (m_mute) notes_off();
 }
 
 void
@@ -283,14 +258,6 @@ Loop::record_event(snd_seq_event_t alsa_event)
         m_events.push_back(event);
         m_events.sort();
         if (alsa_event.type == SND_SEQ_EVENT_NOTEOFF) link_notes();
-
-
-        if (alsa_event.type == SND_SEQ_EVENT_NOTEON) {
-            printf("REC: NOTE ON %i\n", alsa_event.data.note.note);
-        }
-        if (alsa_event.type == SND_SEQ_EVENT_NOTEOFF) {
-            printf("REC: NOTE OFF %i\n", alsa_event.data.note.note);
-        }
         m_dirty++;
     }
 }
@@ -312,18 +279,25 @@ Loop::clear()
         m_events_redo.pop();
     }
     m_dirty++;
+    m_has_undo = false;
+    m_has_redo = false;
 }
 
 void
 Loop::push_undo()
 {
-    if (m_events.size() != m_events_undo.top().size()) {
+    if (
+        (m_events_undo.size() > 0 && m_events.size() != m_events_undo.top().size()) ||
+        m_events_undo.size() == 0
+    ) {
         m_events_undo.push(m_events);
         // link_notes();
         while (!m_events_redo.empty()) {
             m_events_redo.pop();
         }
         m_dirty++;
+        m_has_redo = false;
+        m_has_undo = true;
     }
 }
 
@@ -338,7 +312,10 @@ Loop::pop_undo()
         m_events_undo.pop();
         link_notes(true);
         m_dirty++;
+        m_has_redo = true;
     }
+    if (m_events_undo.size() == 0) m_has_undo = false;
+
 }
 
 void
@@ -351,5 +328,7 @@ Loop::pop_redo()
         m_events_redo.pop();
         link_notes(true);
         m_dirty++;
+        m_has_undo = true;
     }
+    if (m_events_redo.size() == 0) m_has_redo = false;
 }

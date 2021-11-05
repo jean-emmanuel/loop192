@@ -152,6 +152,7 @@ Engine::osc_init()
 
     }
     lo_server_add_method(m_osc_server, "/set", "sf", Engine::osc_ctrl_handler, this);
+    lo_server_add_method(m_osc_server, "/panic", "", Engine::osc_cmd_handler, this);
     lo_server_add_method(m_osc_server, "/play", "", Engine::osc_cmd_handler, this);
     lo_server_add_method(m_osc_server, "/stop", "", Engine::osc_cmd_handler, this);
     lo_server_add_method(m_osc_server, "/status", "", Engine::osc_cmd_handler, this);
@@ -218,6 +219,10 @@ Engine::osc_cmd_handler(const char *path, const char *types, lo_arg ** argv, int
     } else if (!strcmp(path, "/stop")) {
         if (self->m_jack_running) self->jack_stop();
         else self->stop();
+    } else if (!strcmp(path, "/panic")) {
+        for (std::list <Loop>::iterator i = self->m_loops.begin(); i != self->m_loops.end(); i++) {
+            (*i).set_mute(true);
+        }
     } else if (!strcmp(path, "/status")) {
 
         std::string json = "{";
@@ -230,7 +235,7 @@ Engine::osc_cmd_handler(const char *path, const char *types, lo_arg ** argv, int
             json += "{";
             json += "\"id\":" + std::to_string((*i).m_id) + ",";
             json += "\"length\":" + std::to_string((*i).m_length) + ",";
-            json += "\"playing\":" + std::to_string((*i).m_playing) + ",";
+            json += "\"mute\":" + std::to_string((*i).m_mute) + ",";
             json += "\"recording\":" + std::to_string((*i).m_recording) + ",";
             json += "\"record_starting\":" + std::to_string((*i).m_record_starting) + ",";
             json += "\"record_stopping\":" + std::to_string((*i).m_record_stopping) + ",";
@@ -353,12 +358,9 @@ Engine::set_bpm(double bpm)
 void
 Engine::start()
 {
-    bool trig = m_playing;
-
-    if (trig) {
-        printf("Engine transport restarted\n");
-    } else {
-        printf("Engine transport started\n");
+    if (m_playing) {
+        printf("Engine transport restarting\n");
+        stop();
     }
 
     m_playing = true;
@@ -368,14 +370,31 @@ Engine::start()
     m_last_time = (system_time.tv_sec * 1000000) + (system_time.tv_nsec / 1000);
 
     for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
-        if ((*i).m_playing) {
-            (*i).stop_playing();
-            (*i).queue_start_playing();
-        }
-        if ((*i).m_recording) (*i).stop_recording();
-        if ((*i).m_overdubbing) (*i).stop_overdubbing();
+        (*i).notes_off();
+        (*i).m_lasttick = 0;;
+
     }
 
+    printf("Engine transport started\n");
+
+}
+
+void
+Engine::stop()
+{
+    if (m_playing) {
+        printf("Engine transport stopped\n");
+        m_tick = 0;
+        m_playing = false;
+        for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
+            (*i).notes_off();
+            (*i).m_tick = 0;
+            (*i).m_lasttick = 0;
+            (*i).m_starttick = 0;
+            (*i).stop_recording();
+            (*i).stop_overdubbing();
+        }
+    }
 }
 
 void
@@ -396,18 +415,4 @@ Engine::jack_stop()
 {
     printf("Jack transport stopped\n");
     jack_transport_stop(m_jack_client);
-}
-
-
-void
-Engine::stop()
-{
-    if (m_playing) {
-        printf("Engine transport stopped\n");
-        m_tick = 0;
-        m_playing = false;
-        for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
-            (*i).notes_off();
-        }
-    }
 }

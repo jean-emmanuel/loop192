@@ -42,7 +42,8 @@ class Loop
         std::list <Event> m_events;
         std::stack <std::list <Event>> m_events_undo;
         std::stack <std::list <Event>> m_events_redo;
-
+        bool m_has_undo;
+        bool m_has_redo;
 
         long m_tick;
         long m_length;
@@ -72,6 +73,7 @@ class Loop
         void stop_playing();
         void start_overdubbing();
         void stop_overdubbing();
+        void set_mute(bool mute);
 
         void link_notes(bool reset = false);
         void notes_off();

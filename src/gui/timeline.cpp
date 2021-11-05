@@ -71,7 +71,8 @@ Timeline::draw_background()
     }
 
     color = c_color_text;
-    cr->set_source_rgba(color.get_red(), color.get_green(), color.get_blue(), 1.0);
+    cr->set_source_rgba(color.get_red(), color.get_green(), color.get_blue(), 0.6);
+    cr->set_line_width(2.0);
 
     int length = m_loop->m_length;
     int max_y = 0;
@@ -129,7 +130,7 @@ Timeline::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         newsurface = true;
     }
 
-    if (!newsurface && m_dirty != m_loop->m_dirty) // TODO && loop changed
+    if (!newsurface && m_dirty != m_loop->m_dirty)
     {
         draw_background();
     }
@@ -140,9 +141,13 @@ Timeline::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 
     // draw marker
     int x = 2 + (width - 4) * m_loop->m_lasttick / m_loop->m_length;
-    // if (!m_loop->m_playing && !m_loop->m_recording) x = 0;
-    auto color = c_color_primary;
-    cr->set_source_rgb(color.get_red(), color.get_green(), color.get_blue());
+    if (m_loop->m_mute) {
+        auto color = c_color_text;
+        cr->set_source_rgba(color.get_red(), color.get_green(), color.get_blue(), 0.6);
+    } else {
+        auto color = c_color_primary;
+        cr->set_source_rgb(color.get_red(), color.get_green(), color.get_blue());
+    }
     cr->set_line_width(1.0);
     cr->move_to(x - 0.5, 0);
     cr->line_to(x - 0.5, height);

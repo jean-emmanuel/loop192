@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-static char * loop192_32_xpm[] = {
+static const char * loop192_32_xpm[] = {
 "32 32 3 1",
 " 	c None",
 ".	c #FFFFFF",

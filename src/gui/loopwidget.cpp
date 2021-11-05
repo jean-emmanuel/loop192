@@ -46,9 +46,86 @@ LoopWidget::LoopWidget(Loop * loop) : m_timeline(loop)
     m_overdub.set_label("Overdub");
     m_mute.set_label("Mute");
 
+    m_record.get_style_context()->add_class("record");
+    m_overdub.get_style_context()->add_class("overdub");
+    m_mute.get_style_context()->add_class("mute");
+
+    m_undo.set_can_focus(false);
+    m_redo.set_can_focus(false);
+    m_record.set_can_focus(false);
+    m_overdub.set_can_focus(false);
+    m_mute.set_can_focus(false);
+
+    m_record_state = false;
+    m_overdub_state = false;
+    m_mute_state = false;
+    m_undo_state = false;
+    m_redo_state = false;
+
+    m_undo.set_sensitive(false);
+    m_redo.set_sensitive(false);
+
+    m_record.signal_clicked().connect([&]{
+        if (m_loop->m_recording) m_loop->queue_stop_recording();
+        else m_loop->queue_start_recording();
+    });
+
+    m_overdub.signal_clicked().connect([&]{
+        if (m_loop->m_overdubbing) m_loop->stop_overdubbing();
+        else m_loop->start_overdubbing();
+    });
+
+    m_mute.signal_clicked().connect([&]{
+        m_loop->set_mute(!m_loop->m_mute);
+    });
+
+    m_undo.signal_clicked().connect([&]{
+        m_loop->pop_undo();
+    });
+
+    m_redo.signal_clicked().connect([&]{
+        m_loop->pop_redo();
+    });
+
 }
 
 LoopWidget::~LoopWidget()
 {
+
+}
+
+void
+LoopWidget::timer_callback()
+{
+    // update timeline
+    m_timeline.queue_draw();
+
+    if (m_loop->m_recording != m_record_state) {
+        m_record_state = m_loop->m_recording;
+        if (m_record_state) m_record.get_style_context()->add_class("on");
+        else m_record.get_style_context()->remove_class("on");
+    }
+
+    if (m_loop->m_overdubbing != m_overdub_state) {
+        m_overdub_state = m_loop->m_overdubbing;
+        if (m_overdub_state) m_overdub.get_style_context()->add_class("on");
+        else m_overdub.get_style_context()->remove_class("on");
+    }
+
+    if (m_loop->m_mute != m_mute_state) {
+        m_mute_state = m_loop->m_mute;
+        if (m_mute_state) m_mute.get_style_context()->add_class("on");
+        else m_mute.get_style_context()->remove_class("on");
+    }
+
+    if (m_loop->m_has_undo != m_undo_state) {
+        m_undo_state = m_loop->m_has_undo;
+        m_undo.set_sensitive(m_undo_state);
+    }
+
+    if (m_loop->m_has_redo != m_redo_state) {
+        m_redo_state = m_loop->m_has_redo;
+        m_redo.set_sensitive(m_redo_state);
+    }
 
 }
