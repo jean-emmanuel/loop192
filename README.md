@@ -8,7 +8,7 @@ Minimal MIDI live looper that works like sooperlooper but with MIDI instead of a
 
 **Dependencies** (as debian packages)
 ```
-libjack-jackd2-dev liblo-dev libgtkmm-3.0-dev libasound2-dev nlohmann-json3-dev
+libjack-jackd2-dev liblo-dev libgtkmm-3.0-dev libasound2-dev
 ```
 
 **Build**
