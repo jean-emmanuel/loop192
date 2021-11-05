@@ -201,7 +201,7 @@ Engine::osc_ctrl_handler(const char *path, const char *types, lo_arg ** argv, in
 
     if (!strcmp(&argv[0]->s, "tempo")) {
         self->set_bpm(argv[1]->f);
-    } else if (!strcmp(&argv[0]->s, "eigth_per_cycle")) {
+    } else if (!strcmp(&argv[0]->s, "eighth_per_cycle")) {
         self->set_measure_length(argv[1]->f);
     }
 
