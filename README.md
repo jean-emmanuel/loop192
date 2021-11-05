@@ -1,67 +1,50 @@
-# midilooper
+# loop192
 
 Minimal MIDI live looper that works like sooperlooper but with MIDI instead of audio.
 
-## OSC
+
+
+## Build
+
+**Dependencies** (as debian packages)
 ```
-LOOP COMMANDS:
-
-/ml/#/hit s:cmdname
-    A single hit only, no press-release action
-    Where # is the loop index starting from 0.
-    Specifying * will affect all loops.
-
-    Where cmdname is one of the following:
-
-    record
-    overdub
-    undo
-    redo
-    mute_on
-    mute_off
-    clear
-
-
-GLOBAL COMMANDS:
-
-/set  s:param  f:value
-    where param is one of:
-
-    tempo
-    eighth_per_cycle
-
-/start
-    Start transport (reset playhead position to 0)
-
-/stop
-    Stop transport
-
-/status
-/status s:return_url
-    Send status as a JSON string to return_url (osc.udp:// or osc.unix:// address)
-    If return_url is omitted, the sender's address will be used.
-    If midilooper is bound to a unix socket, the message will be sent from a random udp port, otherwise it will be sent from midilooper's osc port.  
-
-STATUS MESSAGE: /status s:json
-
-    {
-      "playing": 1,             // 0 or 1
-      "tick": 0,                // playhead position*
-      "length": 768,            // cycle length*
-      "bpm": 120,               // tempo
-      "loops": [
-        {
-          "id": 0,              // loop number
-          "length": 768,        // loop length* (multiple of engine's length)
-          "playing": 0,         // 0 or 1
-          "recording": 0,       // 0 or 1
-          "record_starting": 0, // 0 or 1
-          "record_stopping": 0, // 0 or 1
-          "overdubbing": 0      // 0 or 1
-        },
-        ...
-      ]
-    }
-
-    * 192 ticks per quarter notes
+libjack-jackd2-dev liblo-dev libgtkmm-3.0-dev libasound2-dev nlohmann-json3-dev
 ```
+
+**Build**
+```
+make clean && make -j8
+```
+
+**Run**
+
+```
+Usage: ./src/loop192 [options...]
+Options:
+  -l <int> , --loops=<int>         number of midi loops (default: 8)
+  -p <str> , --osc-port=<str>      udp in port number or unix socket path for OSC server (default: 5244)
+  -j , --jack-transport            follow jack transport
+  -n , --no-gui                    headless mode
+  -h , --help                      this usage output
+  -v , --version                   show version only
+```
+
+**Install**
+
+```bash
+sudo make install
+```
+
+Append `PREFIX=/usr` to override the default installation path (`/usr/local`)
+
+**Uninstall**
+
+```bash
+sudo make uninstall
+```
+
+Append `PREFIX=/usr` to override the default uninstallation path (`/usr/local`)
+
+## Documentation
+
+Run `man loop192` after installing.

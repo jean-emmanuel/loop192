@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=loop192
+Comment=Live MIDI looper
+Icon=loop192
+Exec=loop192
+TryExec=loop192
+Terminal=false
+Type=Application
+Categories=Audio;Sequencer;AudioVideo;

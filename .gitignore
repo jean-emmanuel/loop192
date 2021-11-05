@@ -1,2 +1,4 @@
 *.o
-midilooper
+*.d
+src/loop192
+man/loop192.1

@@ -1,8 +1,22 @@
+// This file is part of loop192
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 
-#include "config.hpp"
-#include "engine.hpp"
-#include "event.hpp"
+#include "../config.h"
+#include "engine.h"
+#include "event.h"
 
 Engine::Engine(int n_loops, const char* osc_in_port, bool jack_transport)
 {
@@ -138,7 +152,7 @@ Engine::osc_init()
 
     }
     lo_server_add_method(m_osc_server, "/set", "sf", Engine::osc_ctrl_handler, this);
-    lo_server_add_method(m_osc_server, "/start", "", Engine::osc_cmd_handler, this);
+    lo_server_add_method(m_osc_server, "/play", "", Engine::osc_cmd_handler, this);
     lo_server_add_method(m_osc_server, "/stop", "", Engine::osc_cmd_handler, this);
     lo_server_add_method(m_osc_server, "/status", "", Engine::osc_cmd_handler, this);
     lo_server_add_method(m_osc_server, "/status", "s", Engine::osc_cmd_handler, this);
@@ -198,7 +212,7 @@ Engine::osc_cmd_handler(const char *path, const char *types, lo_arg ** argv, int
 {
     Engine *self = (Engine *)user_data;
 
-    if (!strcmp(path, "/start")) {
+    if (!strcmp(path, "/play")) {
         if (self->m_jack_running) self->jack_start();
         else self->start();
     } else if (!strcmp(path, "/stop")) {
