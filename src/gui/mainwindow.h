@@ -39,14 +39,20 @@ class MainWindow : public Window {
         Button                 m_toolbar_panic;
         Button                 m_toolbar_play;
         Button                 m_toolbar_stop;
-        Entry                  m_toolbar_tempo;
-        Entry                  m_toolbar_length;
+
+        Button                 m_toolbar_bpm_label;
+        SpinButton             m_toolbar_bpm;
+        Glib::RefPtr<Gtk::Adjustment> m_toolbar_bpm_adj;
+        Button                 m_toolbar_length_label;
+        SpinButton             m_toolbar_length;
+        Glib::RefPtr<Gtk::Adjustment> m_toolbar_length_adj;
         Image                  m_toolbar_logo;
 
         bool                   m_toolbar_play_state;
 
 
         bool timer_callback();
+        void clear_focus();
 
 };
 

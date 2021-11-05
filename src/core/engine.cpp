@@ -332,7 +332,15 @@ Engine::jack_process_callback(jack_nframes_t nframes, void* user_data)
 void
 Engine::set_measure_length(double eights)
 {
+
+    if (eights > Config::MAX_8TH_PER_CYCLE) {
+        eights = Config::MAX_8TH_PER_CYCLE;
+    } else if (eights < Config::MIN_8TH_PER_CYCLE) {
+        eights = Config::MIN_8TH_PER_CYCLE;
+    }
+
     int length = Config::PPQN * eights / 2;
+
     if (length != m_length) {
         m_length = length;
         for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {

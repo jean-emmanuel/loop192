@@ -93,13 +93,13 @@ Timeline::draw_background()
             int x2 = 2 + (width - 4) * (*i).m_linked_event->get_timestamp() / length;
             if ((*i).m_linked_event->get_timestamp() >= (*i).get_timestamp()) {
                 if (x2 - x1 < 2) x2 = x1 + 2;
-                cr->move_to(x1, y);
-                cr->line_to(x2, y);
+                cr->move_to(x1 - 1, y);
+                cr->line_to(x2 - 1, y);
             } else {
-                cr->move_to(x1, y);
+                cr->move_to(x1 - 1, y);
                 cr->line_to(width - 2, y);
                 cr->move_to(2, y);
-                cr->line_to(x2, y);
+                cr->line_to(x2 - 1, y);
             }
         }
     }

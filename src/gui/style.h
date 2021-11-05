@@ -113,8 +113,46 @@ button:disabled {
     opacity: 0.75
 }
 
+.nomargin {
+    margin-right: -9px;
+}
+
 .loopwidget {
     background: @color_fg;
+}
+
+entry {
+    background: rgba(0, 0, 0, 0.15);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+    color: inherit
+}
+
+entry:focus {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+selection {
+    background: @color_primary;
+    color: @color_text_hilight
+}
+
+spinbutton entry {
+    box-shadow: none
+}
+
+spinbutton {
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+    color: inherit;
+    background: transparent
+}
+
+spinbutton button {
+    box-shadow: none;
+    padding: 2px 6px;
+}
+
+spinbutton button:last-child {
+    margin-left: 1px;
 }
 
 )CSS";

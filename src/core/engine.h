@@ -59,7 +59,10 @@ class Engine
         long m_tick;
         bool m_playing;
         double m_bpm;
+        double get_bpm(){return m_bpm;};
         int m_length;
+        int get_length(){return m_length;};
+
         int m_n_loops;
         std::list <Loop> m_loops;
 

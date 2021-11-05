@@ -28,7 +28,10 @@ namespace Config
     const double MAX_BPM = 3000;
 
     const int PPQN = 192;
-    const int DEFAULT_8TH_PER_CYCLE = 8;
+
+    const double DEFAULT_8TH_PER_CYCLE = 8;
+    const double MIN_8TH_PER_CYCLE = 1;
+    const double MAX_8TH_PER_CYCLE = 200;
 
 }
 

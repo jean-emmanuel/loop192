@@ -15,6 +15,8 @@
 #include "mainwindow.h"
 #include "style.h"
 
+#include "../config.h"
+
 #include "../xpm/loop192.xpm"
 #include "../xpm/loop192_32.xpm"
 
@@ -43,6 +45,7 @@ MainWindow::MainWindow(Engine * engine)
     m_toolbar_panic.get_style_context()->add_class("panic");
     m_toolbar_panic.signal_clicked().connect([&]{
         Engine::osc_cmd_handler("/panic", "", NULL, 0, NULL, m_engine);
+        clear_focus();
     });
     m_toolbar.pack_start(m_toolbar_panic, false, false);
 
@@ -53,6 +56,7 @@ MainWindow::MainWindow(Engine * engine)
     m_toolbar_stop.get_style_context()->add_class("stop");
     m_toolbar_stop.signal_clicked().connect([&]{
         Engine::osc_cmd_handler("/stop", "", NULL, 0, NULL, m_engine);
+        clear_focus();
     });
     m_toolbar.pack_start(m_toolbar_stop, false, false);
 
@@ -63,8 +67,44 @@ MainWindow::MainWindow(Engine * engine)
     m_toolbar_play.get_style_context()->add_class("play");
     m_toolbar_play.signal_clicked().connect([&]{
         Engine::osc_cmd_handler("/play", "", NULL, 0, NULL, m_engine);
+        clear_focus();
     });
     m_toolbar.pack_start(m_toolbar_play, false, false);
+
+    m_toolbar_bpm_label.set_label("Tempo");
+    m_toolbar_bpm_label.set_sensitive(false);
+    m_toolbar_bpm_label.get_style_context()->add_class("nomargin");
+    m_toolbar.pack_start(m_toolbar_bpm_label, false, false);
+
+    m_toolbar_bpm_adj = Gtk::Adjustment::create(m_engine->get_bpm(), Config::MIN_BPM, Config::MAX_BPM, 1, 10, 1);
+    m_toolbar_bpm.set_tooltip_text("Beats per minute");
+    m_toolbar_bpm.set_width_chars(6);
+    m_toolbar_bpm.set_digits(2);
+    m_toolbar_bpm.set_numeric(true);
+    m_toolbar_bpm.set_alignment(0.5);
+    m_toolbar_bpm.set_adjustment(m_toolbar_bpm_adj);
+    m_toolbar_bpm.signal_activate().connect([&]{clear_focus();});
+    m_toolbar_bpm.signal_value_changed().connect([&]{
+        m_engine->set_bpm(m_toolbar_bpm.get_value());
+    });
+    m_toolbar.pack_start(m_toolbar_bpm, false, false);
+
+    m_toolbar_length_label.set_label("Length");
+    m_toolbar_length_label.set_sensitive(false);
+    m_toolbar_length_label.get_style_context()->add_class("nomargin");
+    m_toolbar.pack_start(m_toolbar_length_label, false, false);
+    m_toolbar_length_adj = Gtk::Adjustment::create(m_engine->get_length() / Config::PPQN * 2, Config::MIN_8TH_PER_CYCLE, Config::MAX_8TH_PER_CYCLE, 1, 10, 1);
+    m_toolbar_length.set_tooltip_text("Eighth notes per cycle");
+    m_toolbar_length.signal_activate().connect([&]{clear_focus();});
+    m_toolbar_length.set_width_chars(4);
+    m_toolbar_length.set_digits(1);
+    m_toolbar_length.set_alignment(0.5);
+    m_toolbar_length.set_adjustment(m_toolbar_length_adj);
+    m_toolbar_length.signal_value_changed().connect([&]{
+        m_engine->set_measure_length(m_toolbar_length.get_value());
+    });
+    m_toolbar.pack_start(m_toolbar_length, false, false);
+
 
     m_toolbar_logo.set(Gdk::Pixbuf::create_from_xpm_data(loop192_xpm));
     m_toolbar.pack_end(m_toolbar_logo, false, false);
@@ -85,6 +125,7 @@ MainWindow::MainWindow(Engine * engine)
     set_icon(Gdk::Pixbuf::create_from_xpm_data(loop192_32_xpm));
 
     resize(600, 200);
+    clear_focus();
     show_all();
 }
 
@@ -103,6 +144,11 @@ MainWindow::timer_callback()
         else m_toolbar_play.get_style_context()->remove_class("on");
     }
 
+    double bpm = m_engine->get_bpm();
+    if (m_toolbar_bpm.get_value() != bpm) {
+        m_toolbar_bpm.set_value(bpm);
+    }
+
     auto children = m_loops.get_children();
     for (auto i = children.begin(); i != children.end(); i++) {
         LoopWidget *w = (LoopWidget *)(*i);
@@ -110,4 +156,13 @@ MainWindow::timer_callback()
     }
 
     return true;
+}
+
+void
+MainWindow::clear_focus()
+{
+    m_toolbar_bpm.select_region(0, 0);
+    m_scroll.set_can_focus(true);
+    m_scroll.grab_focus();
+    m_scroll.set_can_focus(false);
 }
