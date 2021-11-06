@@ -1,0 +1,130 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "LOOP192" "1" "November 2021" "" "User manual"
+.SH "NAME"
+\fBloop192\fR \- live MIDI sequencer
+.SH "SYNOPSIS"
+\fBloop192\fR [OPTION\|\.\|\.\|\.]
+.SH "DESCRIPTION"
+loop192 is a MIDI looper that works like sooperlooper but with MIDI instead of audio\.
+.SH "OPTIONS"
+.TP
+\fB\-h, \-\-help\fR
+Show available options
+.TP
+\fB\-p, \-\-osc\-port\fR \fIport\fR
+OSC input port (udp port number or unix socket path)
+.TP
+\fB\-j, \-\-jack\-transport\fR
+Sync to jack transport
+.TP
+\fB\-n, \-\-no\-gui\fR
+Enable headless mode
+.TP
+\fB\-v, \-\-version\fR
+Show version and exit
+.SH "USER INTERFACE"
+TODO
+.SH "JACK TRANSPORT"
+When \fB\-\-jack\-transport\fR is set, loop192 will
+.IP "" 4
+.nf
+\- follow start / stop commands from other clients
+\- send start / stop commands to other clients
+\- use the transport master's bpm
+\- set its position to 0 whenever the transport stops or restarts
+\- **not** attempt to reposition within loops
+.fi
+.IP "" 0
+.SH "OSC CONTROLS"
+.TP
+\fB/play\fR
+Start playback or restart if already playing
+.TP
+\fB/stop\fR
+Stop playback
+.TP
+\fB/set\fR <string: parameter> <float: value>
+Set parameter's value\. Supported parameters:
+.br
+\fItempo\fR: beats per minute
+.br
+\fIeighth_per_cycle\fR: cycle length in eigth notes\. Loops lengths will always be a multiple of the cycle length\.
+.TP
+\fB/loop/#/hit\fR <string: command>
+Apply \fIcommand\fR to loop number \fI#\fR (starting at 0)\. Loop Specifying \fI*\fR will affect all loops\. Also supports patterns like [1\-3]\. Supported commands:
+.br
+\fIrecord\fR: start/stop recording at next cycle beginning
+.br
+\fIoverdub\fR: start/stop overdubbing immedietely
+.br
+\fIundo\fR: undo last overdub/record
+.br
+\fIredo\fR: redo last overdub/record
+.br
+\fImute_on\fR: mute loop
+.br
+\fImute_off\fR: unmute loop
+.br
+\fIclear\fR: clear loop and undo history
+.TP
+\fB/status\fR <string: address>
+Send looper's status as json
+.br
+\fIaddress\fR: \fIosc\.udp://ip:port\fR or \fIosc\.unix:///path/to/socket\fR ; if omitted the response will be sent to the sender
+.SH "OSC STATUS"
+.nf
+
+{
+  "playing": \fIint\fR,
+  "tick": \fIint\fR,
+  "length": \fIint\fR,
+  "tempo": \fIfloat\fR,
+  "loops": [
+    {
+      "id": \fIint\fR,
+      "length": \fIint\fR,
+      "mute": \fIint\fR,
+      "recording": \fIint\fR,
+      "waiting": \fIint\fR,
+      "record_stopping": \fIint\fR,
+      "overdubbing": \fIint\fR
+    },
+    \|\.\|\.\|\.
+  ]
+}
+.fi
+.P
+\fBLooper status\fR
+.IP "" 4
+.nf
+playing: playback state
+tick: playback tick (192 ticks = 1 quarter note)
+length: cycle length in ticks
+tempo: current bpm
+.fi
+.IP "" 0
+.P
+\fBLoops statuses\fR (1 per loop)
+.IP "" 4
+.nf
+id: loop id (starting at 0)
+length: loop length in ticks (multiple of engine's length)
+mute: 1 if muted, 0 otherwise
+recording: 1 if recording, 0 otherwise
+waiting: 1 if waiting for next cycle to start/stop recording, 0 otherwise
+overdubbing: 1 if overdubbing, 0 otherwise
+.fi
+.IP "" 0
+.SH "AUTHORS"
+loop192 is written by Jean\-Emmanuel Doucet\.
+.SH "COPYRIGHT"
+Copyright \(co 2021 Jean\-Emmanuel Doucet \fIjean\-emmanuel@ammd\.net\fR
+.P
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version\.
+.P
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE\. See the GNU General Public License for more details\.
+.P
+You should have received a copy of the GNU General Public License along with this program\. If not, see \fIhttps://www\.gnu\.org/licenses/\fR\.
+.SH "LINKS"
+Sources: \fIhttps://github\.com/jean\-emmanuel/loop192\fR

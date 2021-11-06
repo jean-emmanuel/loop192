@@ -52,7 +52,7 @@ When `--jack-transport` is set, loop192 will
 * `/set` <string: parameter> <float: value>:
     Set parameter's value. Supported parameters:<br/>
     _tempo_: beats per minute<br/>
-    _eigth_per_cycle_: cycle length in eigth notes. Loops lengths will always be a multiple of the cycle length.
+    _eighth_per_cycle_: cycle length in eigth notes. Loops lengths will always be a multiple of the cycle length.
 
 * `/loop/#/hit` <string: command>:
     Apply _command_ to loop number _#_ (starting at 0). Loop Specifying _*_ will affect all loops. Also supports patterns like [1-3]. Supported commands:<br/>
@@ -107,7 +107,7 @@ When `--jack-transport` is set, loop192 will
     mute: 1 if muted, 0 otherwise
     recording: 1 if recording, 0 otherwise
     waiting: 1 if waiting for next cycle to start/stop recording, 0 otherwise
-    overdubbing: 1 if overdubbgin, 0 otherwise
+    overdubbing: 1 if overdubbing, 0 otherwise
 
 
 ## AUTHORS
