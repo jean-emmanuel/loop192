@@ -29,6 +29,8 @@ Engine::Engine(int n_loops, const char* osc_in_port, bool jack_transport)
     m_last_time = 0;
     m_jack_running = false;
     m_length = 0;
+    m_queue_length = 0;
+
 
     set_bpm(Config::DEFAULT_BPM);
     set_measure_length(Config::DEFAULT_8TH_PER_CYCLE);
@@ -50,6 +52,10 @@ Engine::~Engine()
 
     m_alsa_seq = NULL;
     lo_server_free(m_osc_server);
+
+    if (m_jack_running && jack_client_close(m_jack_client)) {
+        printf("Cannot close Jack client.\n");
+    }
 }
 
 void

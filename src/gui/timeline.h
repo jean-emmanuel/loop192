@@ -18,12 +18,10 @@
 #include <gtkmm.h>
 
 #include "../core/loop.h"
-#include "timeline_events.h"
-#include "timeline_marker.h"
 
 using namespace Gtk;
 
-class Timeline : public Overlay {
+class Timeline : public DrawingArea {
 
     public:
 
@@ -31,12 +29,17 @@ class Timeline : public Overlay {
         ~Timeline();
 
         Loop            *m_loop;
-        int              m_dirty;
-        TimelineEvents   m_events;
-        TimelineMarker   m_marker;
+        Cairo::RefPtr<Cairo::ImageSurface> m_surface;
 
+        int              m_dirty;
+        int              m_last_marker_pos;
+
+        void draw_background();
         void update();
 
+    protected:
+
+        bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
 };
 
 #endif

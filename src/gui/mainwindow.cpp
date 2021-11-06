@@ -101,7 +101,7 @@ MainWindow::MainWindow(Engine * engine)
     m_toolbar_length.set_alignment(0.5);
     m_toolbar_length.set_adjustment(m_toolbar_length_adj);
     m_toolbar_length.signal_value_changed().connect([&]{
-        m_engine->set_measure_length(m_toolbar_length.get_value());
+        m_engine->m_queue_length = m_toolbar_length.get_value();
     });
     m_toolbar.pack_start(m_toolbar_length, false, false);
 
@@ -118,8 +118,9 @@ MainWindow::MainWindow(Engine * engine)
         m_loops.pack_start(*w, false, false);
     }
 
-    // timer callback (50 fps)
+    // timer callback (25 fps)
     Glib::signal_timeout().connect(mem_fun(*this, &MainWindow::timer_callback), 20);
+
 
     set_icon(Gdk::Pixbuf::create_from_xpm_data(loop192_32_xpm));
 
