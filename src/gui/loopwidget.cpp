@@ -72,6 +72,7 @@ LoopWidget::LoopWidget(Loop * loop) : m_timeline(loop)
     m_mute_state = false;
     m_undo_state = false;
     m_redo_state = false;
+    m_wait_state = false;
 
     m_undo.set_sensitive(false);
     m_redo.set_sensitive(false);
@@ -141,6 +142,13 @@ LoopWidget::timer_callback()
     if (m_loop->m_has_redo != m_redo_state) {
         m_redo_state = m_loop->m_has_redo;
         m_redo.set_sensitive(m_redo_state);
+    }
+
+    bool wait = m_loop->m_record_starting || m_loop->m_record_stopping;
+    if (wait != m_wait_state) {
+        m_wait_state = wait;
+        if (m_wait_state) m_record.get_style_context()->add_class("waiting");
+        else m_record.get_style_context()->remove_class("waiting");
     }
 
 }

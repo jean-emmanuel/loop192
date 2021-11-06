@@ -186,6 +186,7 @@ Loop::set_mute(bool mute)
 {
     m_mute = mute;
     if (m_mute) notes_off();
+    m_dirty++;
 }
 
 void

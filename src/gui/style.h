@@ -113,6 +113,16 @@ button.record.on {
     color: @color_record;
 }
 
+@keyframes record-blink {
+    0% {color: @color_text;}
+    50% {color: @color_record;}
+}
+button.record.waiting {
+    color: @color_text;
+    animation: record-blink 0.5s steps(2) infinite;
+    transition: color 0s;
+}
+
 button:disabled {
     opacity: 0.75
 }

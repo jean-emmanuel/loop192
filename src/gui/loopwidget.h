@@ -50,6 +50,7 @@ class LoopWidget : public Box {
         bool m_record_state;
         bool m_overdub_state;
         bool m_mute_state;
+        bool m_wait_state;
 
         void timer_callback();
 
