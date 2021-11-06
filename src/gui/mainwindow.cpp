@@ -44,12 +44,7 @@ MainWindow::MainWindow(Engine * engine, Glib::RefPtr<Gtk::Application> app, nsm_
     m_menu_file_quit.set_use_underline(true);
     m_menu_file_quit.add_accelerator("activate", get_accel_group(), 'q', Gdk::CONTROL_MASK, Gtk::ACCEL_VISIBLE);
     m_menu_file_quit.signal_activate().connect([this]{
-        if (m_nsm && global_nsm_optional_gui_support) {
-            // nsm : hide gui instead of closing
-            global_nsm_gui = false;
-        } else {
-            close();
-        }
+        close();
     });
     m_submenu_file.append(m_menu_file_quit);
 
