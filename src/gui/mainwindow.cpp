@@ -118,9 +118,8 @@ MainWindow::MainWindow(Engine * engine)
         m_loops.pack_start(*w, false, false);
     }
 
-    // timer callback (25 fps)
+    // timer callback (50 fps)
     Glib::signal_timeout().connect(mem_fun(*this, &MainWindow::timer_callback), 20);
-
 
     set_icon(Gdk::Pixbuf::create_from_xpm_data(loop192_32_xpm));
 

@@ -96,6 +96,9 @@ Engine::process()
     snd_seq_drain_output(m_alsa_seq);
     snd_seq_sync_output_queue(m_alsa_seq);
 
+    // thread safe ui callbacks
+    if (m_queue_length != 0) set_measure_length(m_queue_length);
+
 }
 
 void
@@ -348,6 +351,8 @@ Engine::set_measure_length(double eights)
             (*i).m_length = m_length;
         }
     }
+
+    m_queue_length = 0;
 }
 
 void

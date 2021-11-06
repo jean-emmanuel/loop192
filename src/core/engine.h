@@ -62,6 +62,7 @@ class Engine
         double get_bpm(){return m_bpm;};
         int m_length;
         int get_length(){return m_length;};
+        int m_queue_length;
 
         int m_n_loops;
         std::list <Loop> m_loops;

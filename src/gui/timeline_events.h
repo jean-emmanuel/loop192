@@ -12,31 +12,29 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#ifndef LOOP192_TIMELINE
-#define LOOP192_TIMELINE
+#ifndef LOOP192_TIMELINEVENTS
+#define LOOP192_TIMELINEVENTS
 
 #include <gtkmm.h>
 
 #include "../core/loop.h"
-#include "timeline_events.h"
-#include "timeline_marker.h"
 
 using namespace Gtk;
 
-class Timeline : public Overlay {
+class TimelineEvents : public DrawingArea {
 
     public:
 
-        Timeline(Loop * loop);
-        ~Timeline();
+        TimelineEvents(Loop * loop);
+        ~TimelineEvents();
 
         Loop            *m_loop;
+
         int              m_dirty;
-        TimelineEvents   m_events;
-        TimelineMarker   m_marker;
 
-        void update();
+    protected:
 
+        bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr);
 };
 
 #endif
