@@ -15,7 +15,6 @@
 #ifndef LOOP192_CONFIG
 #define LOOP192_CONFIG
 
-#define DEFAULT_OSC_PORT "5244"
 #define DEFAULT_N_LOOPS 8
 #define BINARY_NAME "loop192"
 #define CLIENT_NAME "Loop192"

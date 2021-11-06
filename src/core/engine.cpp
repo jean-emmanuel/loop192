@@ -18,6 +18,8 @@
 #include "engine.h"
 #include "event.h"
 
+extern std::string global_client_name;
+
 Engine::Engine(int n_loops, const char* osc_in_port, bool jack_transport)
 {
     m_osc_port = osc_in_port;
@@ -36,7 +38,8 @@ Engine::Engine(int n_loops, const char* osc_in_port, bool jack_transport)
     set_measure_length(Config::DEFAULT_8TH_PER_CYCLE);
 
     midi_init();
-    osc_init();
+
+    if (m_osc_port != 0) osc_init();
 
     if (jack_transport) jack_init();
 }
@@ -51,7 +54,8 @@ Engine::~Engine()
     snd_seq_sync_output_queue(m_alsa_seq);
 
     m_alsa_seq = NULL;
-    lo_server_free(m_osc_server);
+
+    if (m_osc_port != 0) lo_server_free(m_osc_server);
 
     if (m_jack_running && jack_client_close(m_jack_client)) {
         printf("Cannot close Jack client.\n");
@@ -96,7 +100,7 @@ Engine::process()
     }
 
     // receive osc events
-    while (lo_server_recv_noblock(m_osc_server, 0)) {}
+    if (m_osc_port != 0) while (lo_server_recv_noblock(m_osc_server, 0)) {}
 
     // flush midi output
     snd_seq_drain_output(m_alsa_seq);
@@ -118,7 +122,7 @@ Engine::midi_init()
     	exit(1);
     }
 
-    snd_seq_set_client_name(m_alsa_seq, CLIENT_NAME);
+    snd_seq_set_client_name(m_alsa_seq, global_client_name.c_str());
 
 
     for (int i = 0; i < m_n_loops; i++) {
@@ -154,6 +158,7 @@ Engine::osc_init()
 
     if (!m_osc_server) exit(1);
 
+    printf("OSC server listening on port %s\n", m_osc_port);
 
     for (int i = 0; i < m_n_loops; i++) {
         std::string path = "/ml/" + std::to_string(i) + "/hit";
@@ -282,7 +287,7 @@ void
 Engine::jack_init()
 {
 
-    m_jack_client = jack_client_open(CLIENT_NAME, JackNullOption, NULL);
+    m_jack_client = jack_client_open(global_client_name.c_str(), JackNullOption, NULL);
 
     if (m_jack_client == 0)
     {

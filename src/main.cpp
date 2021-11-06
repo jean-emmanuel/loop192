@@ -44,7 +44,7 @@ static void usage(char *argv0)
     fprintf(stderr, "Usage: %s [options...]\n", argv0);
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "  -l <int> , --loops=<int>         number of midi loops (default: %i)\n", DEFAULT_N_LOOPS);
-    fprintf(stderr, "  -p <str> , --osc-port=<str>      udp in port number or unix socket path for OSC server (default: %s)\n", DEFAULT_OSC_PORT);
+    fprintf(stderr, "  -p <str> , --osc-port=<str>      udp in port number or unix socket path for OSC server\n");
     fprintf(stderr, "  -j , --jack-transport            follow jack transport\n");
     fprintf(stderr, "  -n , --no-gui                    headless mode\n");
     fprintf(stderr, "  -h , --help                      this usage output\n");
@@ -55,7 +55,7 @@ struct OptionInfo
 {
     OptionInfo() :
         n_loops(DEFAULT_N_LOOPS),
-        port(DEFAULT_OSC_PORT),
+        port(0),
         jack_transport(0),
         no_gui(0),
         show_usage(0),
