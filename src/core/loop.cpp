@@ -39,6 +39,7 @@ Loop::Loop(Engine * engine, int id, snd_seq_t * seq, int port)
     m_queue_redo = false;
     m_queue_overdub_start = false;
     m_queue_overdub_stop = false;
+    m_queue_clear = false;
 }
 
 Loop::~Loop()
@@ -109,7 +110,7 @@ Loop::process()
     if (m_queue_redo) pop_redo();
     if (m_queue_overdub_start) start_overdubbing();
     if (m_queue_overdub_stop) stop_overdubbing();
-
+    if (m_queue_clear) clear();
 }
 
 void
@@ -292,6 +293,7 @@ Loop::clear()
     m_dirty++;
     m_has_undo = false;
     m_has_redo = false;
+    m_queue_clear = false;
 }
 
 void

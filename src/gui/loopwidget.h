@@ -43,6 +43,7 @@ class LoopWidget : public Box {
         Button           m_record;
         Button           m_overdub;
         Button           m_mute;
+        Button           m_clear;
 
         bool m_undo_state;
         bool m_redo_state;

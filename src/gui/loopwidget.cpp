@@ -46,11 +46,15 @@ LoopWidget::LoopWidget(Loop * loop) : m_timeline(loop)
     m_timeline.set_hexpand(true);
     m_timeline.set_halign(Gtk::ALIGN_FILL);
 
+
+    pack_start(m_clear,false,false);
+
     m_undo.set_label("Undo");
     m_redo.set_label("Redo");
     m_record.set_label("Record");
     m_overdub.set_label("Overdub");
     m_mute.set_label("Mute");
+    m_clear.set_label("Clear");
 
     m_record.get_style_context()->add_class("record");
     m_overdub.get_style_context()->add_class("overdub");
@@ -61,6 +65,7 @@ LoopWidget::LoopWidget(Loop * loop) : m_timeline(loop)
     m_record.set_can_focus(false);
     m_overdub.set_can_focus(false);
     m_mute.set_can_focus(false);
+    m_clear.set_can_focus(false);
 
     m_record_state = false;
     m_overdub_state = false;
@@ -91,6 +96,10 @@ LoopWidget::LoopWidget(Loop * loop) : m_timeline(loop)
 
     m_redo.signal_clicked().connect([&]{
         m_loop->m_queue_redo = true;
+    });
+
+    m_clear.signal_clicked().connect([&]{
+        m_loop->m_queue_clear = true;
     });
 
 }

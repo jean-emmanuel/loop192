@@ -66,6 +66,7 @@ class Loop
         bool m_queue_overdub_stop;
         bool m_queue_undo;
         bool m_queue_redo;
+        bool m_queue_clear;
         int  m_dirty;
 
         void process();
