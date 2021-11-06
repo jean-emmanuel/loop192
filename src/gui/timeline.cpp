@@ -52,8 +52,6 @@ Timeline::draw_background()
     cr->paint_with_alpha(1.0);
     cr->set_operator(Cairo::OPERATOR_OVER);
 
-
-
     cr->set_line_width(1.0);
     auto color = c_color_text;
     for (int i = 0; i < m_loop->m_length; i+= Config::PPQN / 4){
@@ -79,36 +77,30 @@ Timeline::draw_background()
     int length = m_loop->m_length;
     int max_y = 0;
     int min_y = 127;
-    for (std::list <Event>::iterator i = m_loop->m_events.begin(); i != m_loop->m_events.end(); i++) {
-        if ((*i).m_event.type == SND_SEQ_EVENT_NOTEON && (*i).m_linked) {
-            int note = (*i).m_event.data.note.note;
-            if (note < min_y) min_y = note;
-            if (note > max_y) max_y = note;
-        }
+    for (std::list <Note>::iterator i = m_loop->m_notes.begin(); i != m_loop->m_notes.end(); i++) {
+        if ((*i).y < min_y) min_y = (*i).y;
+        if ((*i).y > max_y) max_y = (*i).y;
     }
     min_y -= 2;
     max_y += 2;
-    for (std::list <Event>::iterator i = m_loop->m_events.begin(); i != m_loop->m_events.end(); i++) {
-        if ((*i).m_event.type == SND_SEQ_EVENT_NOTEON && (*i).m_linked) {
-            int y = height - height * ((*i).m_event.data.note.note - min_y) / (max_y - min_y);
-            int x1 = 2 + (width - 4) * (*i).get_timestamp() / length;
-            int x2 = 2 + (width - 4) * (*i).m_linked_event->get_timestamp() / length;
-            if ((*i).m_linked_event->get_timestamp() >= (*i).get_timestamp()) {
-                if (x2 - x1 < 2) x2 = x1 + 2;
-                cr->move_to(x1 - 1, y);
-                cr->line_to(x2 - 1, y);
-            } else {
-                cr->move_to(x1 - 1, y);
-                cr->line_to(width - 2, y);
-                cr->move_to(2, y);
-                cr->line_to(x2 - 1, y);
-            }
+
+    for (std::list <Note>::iterator i = m_loop->m_notes.begin(); i != m_loop->m_notes.end(); i++) {
+        int y = height - height * ((*i).y - min_y) / (max_y - min_y);
+        int x1 = 2 + (width - 4) * (*i).x1 / length;
+        int x2 = 2 + (width - 4) * (*i).x2 / length;
+        if ((*i).x2 >= (*i).x1) {
+            if (x2 - x1 < 2) x2 = x1 + 2;
+            cr->move_to(x1 - 1, y);
+            cr->line_to(x2 - 1, y);
+        } else {
+            cr->move_to(x1 - 1, y);
+            cr->line_to(width - 2, y);
+            cr->move_to(2, y);
+            cr->line_to(x2 - 1, y);
         }
     }
 
     cr->stroke();
-
-    m_dirty = m_loop->m_dirty;
 
 }
 
@@ -130,9 +122,10 @@ Timeline::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         );
         draw_background();
         newsurface = true;
+        m_queue_draw_background = false;
     }
 
-    if (!newsurface && m_dirty != m_loop->m_dirty)
+    if (m_queue_draw_background)
     {
         draw_background();
     }
@@ -162,13 +155,16 @@ Timeline::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 void
 Timeline::update()
 {
+    Gtk::Allocation allocation = get_allocation();
+    const int height = allocation.get_height();
+    const int width = allocation.get_width();
+    m_next_marker_pos = 2 + (width - 4) * m_loop->m_lasttick / m_loop->m_length;
+
     if (m_dirty != m_loop->m_dirty) {
+        m_dirty = m_loop->m_dirty;
+        m_queue_draw_background = true;
         queue_draw();
     } else {
-        Gtk::Allocation allocation = get_allocation();
-        const int height = allocation.get_height();
-        const int width = allocation.get_width();
-        m_next_marker_pos = 2 + (width - 4) * m_loop->m_lasttick / m_loop->m_length;
         if (m_next_marker_pos > m_last_marker_pos) {
             queue_draw_area(m_last_marker_pos - 1, 0, m_next_marker_pos - m_last_marker_pos + 1, height);
         } else {

@@ -197,6 +197,7 @@ Loop::link_notes(bool reset /*=false*/)
             (*i).m_linked = false;
             (*i).m_linked_event = NULL;
         }
+        m_notes.clear();
     }
 
     // link notes
@@ -215,6 +216,13 @@ Loop::link_notes(bool reset /*=false*/)
                     (*off).m_linked_event = &(*on);
                     (*on).m_linked = true;
                     (*off).m_linked = true;
+
+                    // simple note representation for UI
+                    Note n;
+                    n.x1 = (*on).get_timestamp();
+                    n.x2 = (*off).get_timestamp();
+                    n.y = (*on).m_event.data.note.note;
+                    m_notes.push_back(n);
                     break;
                 }
                 off++;
@@ -237,6 +245,13 @@ Loop::link_notes(bool reset /*=false*/)
                 event->m_linked_event = &(*i);
                 event->m_linked = true;
                 (*i).m_linked = true;
+
+                // simple note representation for UI
+                Note n;
+                n.x1 = (*i).get_timestamp();
+                n.x2 = event->get_timestamp();
+                n.y = (*i).m_event.data.note.note;
+                m_notes.push_back(n);
             }
         }
     }
@@ -281,6 +296,7 @@ Loop::clear()
 {
     notes_off();
     m_events.clear();
+    m_notes.clear();
     m_length = m_engine->m_length;
     m_record_starting = false;
     m_record_stopping = false;

@@ -34,6 +34,7 @@ class Timeline : public DrawingArea {
         int              m_dirty;
         int              m_last_marker_pos;
         int              m_next_marker_pos;
+        bool             m_queue_draw_background;
 
         void draw_background();
         void update();

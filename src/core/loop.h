@@ -26,6 +26,11 @@
 
 class Engine;
 
+struct Note
+{
+    int x1; int x2; int y;
+};
+
 class Loop
 {
     public:
@@ -40,6 +45,7 @@ class Loop
         int m_alsa_port;
 
         std::list <Event> m_events;
+        std::list <Note> m_notes;
         std::stack <std::list <Event>> m_events_undo;
         std::stack <std::list <Event>> m_events_redo;
         bool m_has_undo;
