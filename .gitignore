@@ -1,3 +1,4 @@
 *.o
 *.d
 src/loop192
+MANUAL.1.html
