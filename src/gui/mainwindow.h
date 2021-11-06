@@ -21,16 +21,20 @@
 #include "../core/engine.h"
 #include "loopwidget.h"
 
+#include "../lib/nsm.h"
+
 using namespace Gtk;
 
 class MainWindow : public Window {
 
     public:
 
-        MainWindow(Engine * engine);
+        MainWindow(Engine * engine, Glib::RefPtr<Gtk::Application> app, nsm_client_t * nsm);
         ~MainWindow();
 
         Engine                *m_engine;
+        Glib::RefPtr<Gtk::Application> m_app;
+
         ScrolledWindow         m_scroll;
         VBox                   m_vbox;
         HBox                   m_toolbar;
@@ -50,9 +54,15 @@ class MainWindow : public Window {
 
         bool                   m_toolbar_play_state;
 
+        // NSM
+        nsm_client_t          *m_nsm;
+        bool                   m_nsm_visible;
+        void nsm_set_client(nsm_client_t *nsm);
 
         bool timer_callback();
         void clear_focus();
+
+        bool on_delete_event(GdkEventAny *event);
 
 };
 

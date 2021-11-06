@@ -20,10 +20,12 @@
 #include "../xpm/loop192.xpm"
 #include "../xpm/loop192_32.xpm"
 
-
-MainWindow::MainWindow(Engine * engine)
+MainWindow::MainWindow(Engine * engine, Glib::RefPtr<Gtk::Application> app, nsm_client_t * nsm)
 {
     m_engine = engine;
+    m_app = app;
+    m_nsm = nsm;
+    m_nsm_visible = true;
 
     Glib::RefPtr<Gtk::CssProvider> css_provider = Gtk::CssProvider::create();
     css_provider->load_from_data(c_mainwindow_css);
@@ -155,6 +157,24 @@ MainWindow::timer_callback()
         w->timer_callback();
     }
 
+    if (m_nsm) {
+        nsm_check_nowait(m_nsm);
+        if (global_nsm_optional_gui_support && m_nsm_visible != global_nsm_gui) {
+            m_nsm_visible = global_nsm_gui;
+            if (m_nsm_visible)
+            {
+                show();
+                nsm_send_is_shown(m_nsm);
+            }
+            else
+            {
+                m_app->hold();
+                hide();
+                nsm_send_is_hidden(m_nsm);
+            }
+        }
+    }
+
     return true;
 }
 
@@ -166,4 +186,17 @@ MainWindow::clear_focus()
     m_scroll.set_can_focus(true);
     m_scroll.grab_focus();
     m_scroll.set_can_focus(false);
+}
+
+
+bool
+MainWindow::on_delete_event(GdkEventAny *event)
+{
+    if (m_nsm) {
+        // nsm : hide gui instead of closing
+        global_nsm_gui = false;
+        return true;
+    }
+
+    return false;
 }

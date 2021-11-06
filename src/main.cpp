@@ -23,6 +23,8 @@
 #include "gui/mainwindow.h"
 #include <gtkmm.h>
 
+#include "lib/nsm.h"
+
 const char* optstring = "l:p:jnvh";
 
 struct option long_options[] = {
@@ -127,10 +129,53 @@ static void parse_options (int argc, char **argv, OptionInfo & option_info)
     }
 }
 
+std::string global_client_name = CLIENT_NAME;
+
+// Gtk application
 Glib::RefPtr<Gtk::Application> application;
 
-bool run = true;
+// NSM
+nsm_client_t *nsm = 0;
+bool nsm_gui = false;
+bool global_nsm_gui = false;
+bool global_nsm_optional_gui_support = true;
+bool nsm_wait = true;
+int
+nsm_save_cb(char **,  void *userdata)
+{
+    // nothing to save
+    return ERR_OK;
+}
+void
+nsm_hide_cb(void *userdata)
+{
+    global_nsm_gui = false;
+}
+void
+nsm_show_cb(void *userdata)
+{
+    global_nsm_gui = true;
+}
+int
+nsm_open_cb(const char *name, const char *display_name, const char *client_id, char **out_msg, void *userdata)
+{
+    nsm_wait = false;
+    global_client_name = client_id;
+    nsm_set_save_callback(nsm, nsm_save_cb, 0);
+    // NSM API 1.1.0: check if server supports optional-gui
+    global_nsm_optional_gui_support = strstr(nsm_get_session_manager_features(nsm), "optional-gui");
+    if (global_nsm_optional_gui_support) {
+        // make sure nsm server doesn't override cached visibility state
+        nsm_send_is_shown(nsm);
+        // register optional gui callbacks
+        nsm_set_show_callback(nsm, nsm_show_cb, 0);
+        nsm_set_hide_callback(nsm, nsm_hide_cb, 0);
+    }
+    return ERR_OK;
+}
 
+// Engine loop
+bool run = true;
 pthread_t thread;
 bool thread_launched;
 void* main_loop(void *arg)
@@ -167,12 +212,28 @@ int main(int argc, char* argv[])
 
     parse_options (argc, argv, option_info);
 
+    // NSM
+    const char *nsm_url = getenv( "NSM_URL" );
+    if (!option_info.no_gui && nsm_url) {
+        nsm = nsm_new();
+        nsm_set_open_callback(nsm, nsm_open_cb, 0);
+        if (nsm_init(nsm, nsm_url) == 0) {
+            // Announce includes :dirty:capability because we're always clean
+            nsm_send_announce(nsm, BINARY_NAME, ":optional-gui:dirty:", argv[0]);
+        }
+        int timeout = 0;
+        while (nsm_wait) {
+            nsm_check_wait(nsm, 500);
+            timeout += 1;
+            if (timeout > 200) exit(1);
+        }
+    }
+
     Engine * engine = new Engine(option_info.n_loops, option_info.port, option_info.jack_transport);
 
     signal(SIGABRT, &sighandler);
     signal(SIGTERM, &sighandler);
     signal(SIGINT, &sighandler);
-
 
     if (option_info.no_gui) {
         main_loop((void *)engine);
@@ -180,7 +241,7 @@ int main(int argc, char* argv[])
         pthread_create(&thread, NULL, main_loop, engine);
         thread_launched = true;
         application = Gtk::Application::create();
-        MainWindow window(engine);
+        MainWindow window(engine, application, nsm);
         application->run(window);
         if (thread_launched) {
             run = false;
@@ -189,6 +250,11 @@ int main(int argc, char* argv[])
     }
 
     delete engine;
+
+    if (nsm) {
+        nsm_free(nsm);
+        nsm = NULL;
+    }
 
     return 0;
 

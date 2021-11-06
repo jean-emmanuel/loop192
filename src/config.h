@@ -20,6 +20,9 @@
 #define BINARY_NAME "loop192"
 #define CLIENT_NAME "Loop192"
 
+extern bool global_nsm_gui;
+extern bool global_nsm_optional_gui_support;
+
 namespace Config
 {
 
