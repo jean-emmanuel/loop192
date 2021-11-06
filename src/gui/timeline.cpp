@@ -23,6 +23,7 @@ Timeline::Timeline(Loop * loop)
 
     m_dirty = 0;
     m_last_marker_pos = 0;
+    m_next_marker_pos = 0;
 
     Gtk::Allocation allocation = get_allocation();
     m_surface = Cairo::ImageSurface::create(
@@ -141,7 +142,6 @@ Timeline::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     cr->paint();
 
     // draw marker
-    int x = 2 + (width - 4) * m_loop->m_lasttick / m_loop->m_length;
     if (m_loop->m_mute) {
         auto color = c_color_text;
         cr->set_source_rgba(color.get_red(), color.get_green(), color.get_blue(), 0.6);
@@ -150,11 +150,11 @@ Timeline::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         cr->set_source_rgb(color.get_red(), color.get_green(), color.get_blue());
     }
     cr->set_line_width(1.0);
-    cr->move_to(x - 0.5, 0);
-    cr->line_to(x - 0.5, height);
+    cr->move_to(m_next_marker_pos - 0.5, 0);
+    cr->line_to(m_next_marker_pos - 0.5, height);
     cr->stroke();
 
-    m_last_marker_pos = x;
+    m_last_marker_pos = m_next_marker_pos;
 
     return true;
 }
@@ -168,14 +168,12 @@ Timeline::update()
         Gtk::Allocation allocation = get_allocation();
         const int height = allocation.get_height();
         const int width = allocation.get_width();
-        // attempt to predict where the marker will be when the drawing occurs
-        // and invalidate the smallest area to save cpu
-        // TODO: find a better way
-        int x = 2 + (width - 4) * m_loop->m_lasttick / m_loop->m_length;
-        if (x > m_last_marker_pos) {
-            queue_draw_area(m_last_marker_pos - 100, 0, 200, height);
-        } else if (x < m_last_marker_pos) {
-            queue_draw();
+        m_next_marker_pos = 2 + (width - 4) * m_loop->m_lasttick / m_loop->m_length;
+        if (m_next_marker_pos > m_last_marker_pos) {
+            queue_draw_area(m_last_marker_pos - 1, 0, m_next_marker_pos - m_last_marker_pos + 1, height);
+        } else {
+            queue_draw_area(m_last_marker_pos - 1, 0, 1, height);
+            queue_draw_area(m_next_marker_pos - 1, 0, 1, height);
         }
     }
 }

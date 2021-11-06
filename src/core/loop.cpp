@@ -186,7 +186,6 @@ Loop::set_mute(bool mute)
 {
     m_mute = mute;
     if (m_mute) notes_off();
-    m_dirty++;
 }
 
 void
@@ -270,8 +269,10 @@ Loop::record_event(snd_seq_event_t alsa_event)
         event.set_timestamp(m_tick);
         m_events.push_back(event);
         m_events.sort();
-        if (alsa_event.type == SND_SEQ_EVENT_NOTEOFF) link_notes();
-        m_dirty++;
+        if (alsa_event.type == SND_SEQ_EVENT_NOTEOFF) {
+            link_notes();
+            m_dirty++;
+        }
     }
 }
 
