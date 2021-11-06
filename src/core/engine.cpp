@@ -86,15 +86,15 @@ Engine::process()
             (*i).process();
         }
     }
-
     // receive midi events
     while (snd_seq_event_input_pending(m_alsa_seq, 1)) {
         snd_seq_event_t *ev;
-        snd_seq_event_input(m_alsa_seq, &ev);
-        // pass event to loop object
-        for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
-            if (((*i).m_recording || (*i).m_overdubbing) && (*i).m_alsa_port == ev->dest.port) {
-                (*i).record_event(*ev);
+        if (snd_seq_event_input(m_alsa_seq, &ev) >= 0) {
+            // pass event to loop object
+            for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
+                if (((*i).m_recording || (*i).m_overdubbing) && (*i).m_alsa_port == ev->dest.port) {
+                    (*i).record_event(*ev);
+                }
             }
         }
     }
