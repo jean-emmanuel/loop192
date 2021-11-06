@@ -35,6 +35,18 @@ class MainWindow : public Window {
         Engine                *m_engine;
         Glib::RefPtr<Gtk::Application> m_app;
 
+        // menu
+        MenuBar                m_menu;
+        MenuItem               m_menu_file;
+        Menu                   m_submenu_file;
+        MenuItem               m_menu_file_quit;
+        MenuItem               m_menu_transport;
+        Menu                   m_submenu_transport;
+        AccelLabel             m_menu_transport_start_label;
+        MenuItem               m_menu_transport_start;
+        AccelLabel             m_menu_transport_stop_label;
+        MenuItem               m_menu_transport_stop;
+
         ScrolledWindow         m_scroll;
         VBox                   m_vbox;
         HBox                   m_toolbar;

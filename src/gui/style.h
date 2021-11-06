@@ -62,6 +62,37 @@ window {
 }
 
 
+/* menus */
+
+menu {
+    background: @color_fg;
+    border: 1px solid @color_bg;
+    padding: 1px;
+}
+
+menu window arrow:not(.right) {
+    background: @color_fg;
+}
+
+menubar {
+    background: @color_fg;
+    border-bottom: 1px solid @color_bg
+}
+
+menuitem:hover {
+    background: @color_primary;
+    color: @color_text_hilight
+}
+
+separator {
+    background: @color_bg;
+    opacity: 0.5;
+}
+
+menubar > menuitem {
+    margin-left: 1px;
+}
+
 /* scrollbars */
 
 scrollbar {

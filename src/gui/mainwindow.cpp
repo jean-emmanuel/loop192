@@ -33,12 +33,60 @@ MainWindow::MainWindow(Engine * engine, Glib::RefPtr<Gtk::Application> app, nsm_
 
     add(m_vbox);
 
+    // menu bar
+    m_vbox.pack_start(m_menu, false, false);
+    m_menu_file.set_label("_File");
+    m_menu_file.set_use_underline(true);
+    m_menu_file.set_submenu(m_submenu_file);
+    m_menu.append(m_menu_file);
+
+    m_menu_file_quit.set_label(m_nsm && global_nsm_optional_gui_support ? "_Hide" : "_Quit");
+    m_menu_file_quit.set_use_underline(true);
+    m_menu_file_quit.add_accelerator("activate", get_accel_group(), 'q', Gdk::CONTROL_MASK, Gtk::ACCEL_VISIBLE);
+    m_menu_file_quit.signal_activate().connect([this]{
+        if (m_nsm && global_nsm_optional_gui_support) {
+            // nsm : hide gui instead of closing
+            global_nsm_gui = false;
+        } else {
+            close();
+        }
+    });
+    m_submenu_file.append(m_menu_file_quit);
+
+    m_menu_transport.set_label("_Transport");
+    m_menu_transport.set_use_underline(true);
+    m_menu_transport.set_submenu(m_submenu_transport);
+    m_menu.append(m_menu_transport);
+
+    m_menu_transport_start_label.set_label("Start");
+    m_menu_transport_start_label.set_alignment(0);
+    m_menu_transport_start_label.set_accel(GDK_KEY_space, (Gdk::ModifierType)0);
+    m_menu_transport_start.add_accelerator("activate", get_accel_group(), GDK_KEY_space, (Gdk::ModifierType)0, Gtk::ACCEL_VISIBLE);
+    m_menu_transport_start.add(m_menu_transport_start_label);
+    m_menu_transport_start.signal_activate().connect([&]{
+        Engine::osc_cmd_handler("/play", "", NULL, 0, NULL, m_engine);
+        clear_focus();
+    });
+    m_submenu_transport.append(m_menu_transport_start);
+
+    m_menu_transport_stop_label.set_label("Stop");
+    m_menu_transport_stop_label.set_alignment(0);
+    m_menu_transport_stop_label.set_accel(GDK_KEY_Escape, (Gdk::ModifierType)0);
+    m_menu_transport_stop.add_accelerator("activate", get_accel_group(), GDK_KEY_Escape, (Gdk::ModifierType)0, Gtk::ACCEL_VISIBLE);
+    m_menu_transport_stop.add(m_menu_transport_stop_label);
+    m_menu_transport_stop.signal_activate().connect([&]{
+        Engine::osc_cmd_handler("/stop", "", NULL, 0, NULL, m_engine);
+        clear_focus();
+    });
+    m_submenu_transport.append(m_menu_transport_stop);
+
+
+    // Toolbar
     m_toolbar_play_state = false;
     m_vbox.pack_start(m_toolbar, false, false);
     m_toolbar.set_size_request(0, 55);
     m_toolbar.get_style_context()->add_class("toolbar");
     m_toolbar.set_spacing(c_toolbar_spacing);
-
 
     m_toolbar_panic.set_size_request(36, 0);
     m_toolbar_panic.set_can_focus(false);
@@ -107,10 +155,10 @@ MainWindow::MainWindow(Engine * engine, Glib::RefPtr<Gtk::Application> app, nsm_
     });
     m_toolbar.pack_start(m_toolbar_length, false, false);
 
-
     m_toolbar_logo.set(Gdk::Pixbuf::create_from_xpm_data(loop192_xpm));
     m_toolbar.pack_end(m_toolbar_logo, false, false);
 
+    // Loops
     m_vbox.add(m_scroll);
     m_scroll.add(m_loops);
     m_scroll.set_overlay_scrolling(false);
@@ -123,10 +171,10 @@ MainWindow::MainWindow(Engine * engine, Glib::RefPtr<Gtk::Application> app, nsm_
     // timer callback (25 fps)
     Glib::signal_timeout().connect(mem_fun(*this, &MainWindow::timer_callback), 20);
 
-
+    // Window icon
     set_icon(Gdk::Pixbuf::create_from_xpm_data(loop192_32_xpm));
 
-    resize(600, 200);
+    resize(800, 400);
     clear_focus();
     show_all();
 }
@@ -192,7 +240,7 @@ MainWindow::clear_focus()
 bool
 MainWindow::on_delete_event(GdkEventAny *event)
 {
-    if (m_nsm) {
+    if (m_nsm && global_nsm_optional_gui_support) {
         // nsm : hide gui instead of closing
         global_nsm_gui = false;
         return true;
