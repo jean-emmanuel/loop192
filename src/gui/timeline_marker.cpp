@@ -21,6 +21,7 @@ TimelineMarker::TimelineMarker(Loop * loop)
 {
     m_loop = loop;
     m_x = 0;
+    m_tick = 0;
 }
 
 TimelineMarker::~TimelineMarker()
@@ -36,6 +37,7 @@ TimelineMarker::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     const int height = allocation.get_height();
 
     m_h = height;
+    m_tick = m_loop->m_lasttick;
     m_x = 2 + (width - 4) * m_loop->m_lasttick / m_loop->m_length;
     float alpha = 1.0;
     auto color = c_color_primary;

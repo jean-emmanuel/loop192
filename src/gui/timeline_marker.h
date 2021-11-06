@@ -30,6 +30,7 @@ class TimelineMarker : public DrawingArea {
 
         Loop            *m_loop;
 
+        int              m_tick;
         int              m_x;
         int              m_h;
 

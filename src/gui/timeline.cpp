@@ -39,5 +39,11 @@ Timeline::update()
         m_events.queue_draw();
         m_dirty = m_loop->m_dirty;
     }
-    m_marker.queue_draw_area(m_marker.m_x - 50, 0, 100, m_marker.m_h);
+    if (m_marker.m_tick != m_loop->m_lasttick) {
+        // TODO: better perf; handle high speed; 
+        m_marker.queue_draw_area(m_marker.m_x - 50, 0, 100, m_marker.m_h);
+        if (m_loop->m_lasttick < m_marker.m_tick) {
+            m_marker.queue_draw_area(0, 0, 50, m_marker.m_h);
+        }
+    }
 }
