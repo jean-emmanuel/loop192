@@ -2,7 +2,7 @@
 
 Minimal MIDI live looper that works like sooperlooper but with MIDI instead of audio.
 
-
+![loop192 window](https://user-images.githubusercontent.com/5261671/140610503-493f5505-9a6e-4e40-b0d7-64b7ddc918b0.png)
 
 ## Build
 
