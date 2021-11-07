@@ -297,7 +297,6 @@ Loop::record_event(snd_seq_event_t alsa_event)
     }
     if (alsa_event.type == SND_SEQ_EVENT_NOTEOFF) {
         link_notes();
-        set_dirty();
     }
     unlock();
 }
@@ -361,7 +360,6 @@ Loop::pop_undo()
         m_events_redo.push(m_events);
         m_events = m_events_undo.top();
         m_events_undo.pop();
-        set_dirty();
         m_has_redo = true;
         m_record_stopping = false;
         m_recording = false;
@@ -380,7 +378,6 @@ Loop::pop_redo()
         m_events_undo.push(m_events);
         m_events = m_events_redo.top();
         m_events_redo.pop();
-        set_dirty();
         m_has_undo = true;
         link_notes(true);
     }

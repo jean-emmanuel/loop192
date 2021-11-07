@@ -126,6 +126,7 @@ Timeline::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     if (m_queue_draw_background)
     {
         draw_background();
+        m_queue_draw_background = false;
     }
 
     // draw background
