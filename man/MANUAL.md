@@ -40,12 +40,12 @@ The main window consist in a toolbar and a list of loops.
 
 * Each **loop** contains the following controls
 
-    *Undo button*: undo last overdub/record or cancel queued record start.<br/>   
-    *Redo button*: redo last overdub/record<br/>   
-    *Record button*: start/stop recording at next cycle beginning. Blinks when recording is starting/stopping.<br/>   
-    *Overdub button*: startstop overdubbing immediately<br/>   
-    *Mute button*: mute/unmute loop<br/>   
-    *Clear button*: clear loop and undo history<br/>   
+    *Undo button*: undo last overdub/record or cancel queued record start.<br/>
+    *Redo button*: redo last overdub/record<br/>
+    *Record button*: start/stop recording at next cycle beginning. Blinks when recording is starting/stopping.<br/>
+    *Overdub button*: startstop overdubbing immediately<br/>
+    *Mute button*: mute/unmute loop<br/>
+    *Clear button*: clear loop and undo history<br/>
 
 * Each **loop** contains a timeline that shows the note events in the loop and a vertical marker indicating the playback position.
 
@@ -81,11 +81,11 @@ When `--jack-transport` is set, loop192 will
     _redo_: redo last overdub/record<br/>
     _mute_on_: mute loop<br/>
     _mute_off_: unmute loop<br/>
-    _clear_: clear loop and undo history
+    _clear_: clear loop and undo history<br/>
 
 * `/status` <string: address>:
     Send looper's status as json<br/>
-    _address_: *osc.udp://ip:port* or *osc.unix:///path/to/socket* ; if omitted the response will be sent to the sender
+    _address_: *osc.udp://ip:port* or *osc.unix:///path/to/socket* ; if omitted the response will be sent to the sender<br/>
 
 ## OSC STATUS
 
