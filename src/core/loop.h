@@ -46,6 +46,7 @@ class Loop
 
         std::list <Event> m_events;
         std::list <Note> m_notes;
+        std::list <Note> m_notes_draw;
         std::stack <std::list <Event>> m_events_undo;
         std::stack <std::list <Event>> m_events_redo;
         bool m_has_undo;
@@ -96,6 +97,8 @@ class Loop
         void push_undo();
         void pop_undo();
         void pop_redo();
+
+        void cache_notes_list();
 
 };
 

@@ -234,7 +234,7 @@ Loop::link_notes(bool reset /*=false*/)
     if (reset) {
         // insert missing note offs
         for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
-            if ((*i).m_event.type == SND_SEQ_EVENT_NOTEON && (*i).m_linked_event == NULL) {
+            if ((*i).m_event.type == SND_SEQ_EVENT_NOTEON && !(*i).m_linked) {
                 snd_seq_event_t noteoff = (*i).m_event;
                 noteoff.type = SND_SEQ_EVENT_NOTEOFF;
                 Event * event = new Event(noteoff);
@@ -265,7 +265,7 @@ Loop::notes_off()
 {
     // play noteoffs
     for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
-        if ((*i).m_event.type == SND_SEQ_EVENT_NOTEON && (*i).m_note_active) {
+        if ((*i).m_event.type == SND_SEQ_EVENT_NOTEON && (*i).m_note_active && (*i).m_linked) {
             (*i).m_linked_event->send(m_alsa_seq, m_alsa_port);
         }
     }
@@ -354,13 +354,23 @@ Loop::pop_redo()
 {
     if (m_events_redo.size() > 0)
     {
+        lock();
         m_events_undo.push(m_events);
         m_events = m_events_redo.top();
         m_events_redo.pop();
-        link_notes(true);
         m_dirty++;
         m_has_undo = true;
+        unlock();
+        link_notes(true);
     }
     if (m_events_redo.size() == 0) m_has_redo = false;
     m_queue_redo = false;
+}
+
+void
+Loop::cache_notes_list()
+{
+    lock();
+    m_notes_draw = m_notes;
+    unlock();
 }

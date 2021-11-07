@@ -77,14 +77,15 @@ Timeline::draw_background()
     int length = m_loop->m_length;
     int max_y = 0;
     int min_y = 127;
-    for (std::list <Note>::iterator i = m_loop->m_notes.begin(); i != m_loop->m_notes.end(); i++) {
+    m_loop->cache_notes_list();
+    for (std::list <Note>::iterator i = m_loop->m_notes_draw.begin(); i != m_loop->m_notes_draw.end(); i++) {
         if ((*i).y < min_y) min_y = (*i).y;
         if ((*i).y > max_y) max_y = (*i).y;
     }
     min_y -= 2;
     max_y += 2;
 
-    for (std::list <Note>::iterator i = m_loop->m_notes.begin(); i != m_loop->m_notes.end(); i++) {
+    for (std::list <Note>::iterator i = m_loop->m_notes_draw.begin(); i != m_loop->m_notes_draw.end(); i++) {
         int y = height - height * ((*i).y - min_y) / (max_y - min_y);
         int x1 = 2 + (width - 4) * (*i).x1 / length;
         int x2 = 2 + (width - 4) * (*i).x2 / length;
