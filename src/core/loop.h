@@ -18,6 +18,8 @@
 #include <list>
 #include <stack>
 
+#include <mutex>
+
 #include <alsa/asoundlib.h>
 #include <alsa/seq_midi_event.h>
 
@@ -40,6 +42,10 @@ class Loop
 
         Engine * m_engine;
         int m_id;
+
+        std::mutex  *m_mutex;
+        void lock(){m_mutex->lock();};
+        void unlock(){m_mutex->unlock();};
 
         snd_seq_t * m_alsa_seq;
         int m_alsa_port;

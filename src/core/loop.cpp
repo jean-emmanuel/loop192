@@ -20,6 +20,7 @@ Loop::Loop(Engine * engine, int id, snd_seq_t * seq, int port)
     m_id = id;
     m_alsa_seq = seq;
     m_alsa_port = port;
+    m_mutex = new std::mutex();
 
     m_recording = false;
     m_overdubbing = false;
@@ -82,7 +83,7 @@ Loop::process()
 
     // output events
     if (!m_recording && !m_mute && m_events.size() > 0) {
-
+        lock();
         if (m_tick < m_lasttick) {
             // in case we missed some events at the end of the loop
             for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
@@ -100,6 +101,7 @@ Loop::process()
                 break;
             }
         }
+        unlock();
 
     }
 
@@ -191,6 +193,8 @@ Loop::set_mute(bool mute)
 void
 Loop::link_notes(bool reset /*=false*/)
 {
+    lock();
+
     if (reset) {
         // unlink
         for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
@@ -258,22 +262,27 @@ Loop::link_notes(bool reset /*=false*/)
 
     m_dirty++;
 
+    unlock();
+
 }
 
 void
 Loop::notes_off()
 {
+    lock();
     // play noteoffs
     for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
         if ((*i).m_event.type == SND_SEQ_EVENT_NOTEON && (*i).m_note_active && (*i).m_linked) {
             (*i).m_linked_event->send(m_alsa_seq, m_alsa_port);
         }
     }
+    unlock();
 }
 
 void
 Loop::record_event(snd_seq_event_t alsa_event)
 {
+    lock();
     if (
         alsa_event.type == SND_SEQ_EVENT_NOTEON ||
         alsa_event.type == SND_SEQ_EVENT_NOTEOFF ||
@@ -284,10 +293,11 @@ Loop::record_event(snd_seq_event_t alsa_event)
         event.set_timestamp(m_tick);
         m_events.push_back(event);
         m_events.sort();
-        if (alsa_event.type == SND_SEQ_EVENT_NOTEOFF) {
-            link_notes();
-            m_dirty++;
-        }
+    }
+    unlock();
+    if (alsa_event.type == SND_SEQ_EVENT_NOTEOFF) {
+        link_notes();
+        m_dirty++;
     }
 }
 
@@ -295,6 +305,9 @@ void
 Loop::clear()
 {
     notes_off();
+
+    lock();
+
     m_events.clear();
     m_notes.clear();
     m_length = m_engine->m_length;
@@ -312,11 +325,15 @@ Loop::clear()
     m_has_undo = false;
     m_has_redo = false;
     m_queue_clear = false;
+
+    unlock();
+
 }
 
 void
 Loop::push_undo()
 {
+    lock();
     if (
         (m_events_undo.size() > 0 && m_events.size() != m_events_undo.top().size()) ||
         m_events_undo.size() == 0
@@ -330,20 +347,23 @@ Loop::push_undo()
         m_has_redo = false;
         m_has_undo = true;
     }
+    unlock();
 }
 
 void
 Loop::pop_undo()
 {
+    notes_off();
     if (m_events_undo.size() > 0)
     {
-        notes_off();
+        lock();
         m_events_redo.push(m_events);
         m_events = m_events_undo.top();
         m_events_undo.pop();
-        link_notes(true);
         m_dirty++;
         m_has_redo = true;
+        unlock();
+        link_notes(true);
     }
     if (m_events_undo.size() == 0) m_has_undo = false;
     m_queue_undo = false;

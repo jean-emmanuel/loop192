@@ -112,7 +112,6 @@ Timeline::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     Gtk::Allocation allocation = get_allocation();
     const int width = allocation.get_width();
     const int height = allocation.get_height();
-    bool newsurface = false;
 
     // resize handler
     if (width != m_surface->get_width() || height != m_surface->get_height()){
@@ -122,7 +121,6 @@ Timeline::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
             allocation.get_height()
         );
         draw_background();
-        newsurface = true;
         m_queue_draw_background = false;
     }
 
