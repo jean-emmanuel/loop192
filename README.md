@@ -47,4 +47,4 @@ Append `PREFIX=/usr` to override the default uninstallation path (`/usr/local`)
 
 ## Documentation
 
-Run `man loop192` after installing.
+See [loop192.ammd.net](https://loop192.ammd.net/) or run `man loop192` after installing.

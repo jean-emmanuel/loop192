@@ -28,7 +28,26 @@ loop192 is a MIDI looper that works like sooperlooper but with MIDI instead of a
 
 ## USER INTERFACE
 
-TODO
+The main window consist in a toolbar and a list of loops.
+
+* The **toolbar** contains the following controls
+
+    *Panic button*: mute all loops<br/>
+    *Stop button*: stop transport<br/>
+    *Play button*: start or restart transport<br/>
+    *Tempo entry*: set beats per minute<br/>
+    *Length entry*: set eighth notes per cycle<br/>
+
+* Each **loop** contains the following controls
+
+    *Undo button*: undo last overdub/record or cancel queued record start.<br/>   
+    *Redo button*: redo last overdub/record<br/>   
+    *Record button*: start/stop recording at next cycle beginning. Blinks when recording is starting/stopping.<br/>   
+    *Overdub button*: startstop overdubbing immediately<br/>   
+    *Mute button*: mute/unmute loop<br/>   
+    *Clear button*: clear loop and undo history<br/>   
+
+* Each **loop** contains a timeline that shows the note events in the loop and a vertical marker indicating the playback position.
 
 ## JACK TRANSPORT
 
@@ -57,8 +76,8 @@ When `--jack-transport` is set, loop192 will
 * `/loop/#/hit` <string: command>:
     Apply _command_ to loop number _#_ (starting at 0). Loop Specifying _*_ will affect all loops. Also supports patterns like [1-3]. Supported commands:<br/>
     _record_: start/stop recording at next cycle beginning<br/>
-    _overdub_: start/stop overdubbing immedietely<br/>
-    _undo_: undo last overdub/record<br/>
+    _overdub_: start/stop overdubbing immediately<br/>
+    _undo_: undo last overdub/record or cancel queued record start<br/>
     _redo_: redo last overdub/record<br/>
     _mute_on_: mute loop<br/>
     _mute_off_: unmute loop<br/>

@@ -24,7 +24,45 @@ Enable headless mode
 \fB\-v, \-\-version\fR
 Show version and exit
 .SH "USER INTERFACE"
-TODO
+The main window consist in a toolbar and a list of loops\.
+.IP "\[ci]" 4
+The \fBtoolbar\fR contains the following controls
+.IP
+\fIPanic button\fR: mute all loops
+.br
+\fIStop button\fR: stop transport
+.br
+\fIPlay button\fR: start or restart transport
+.br
+\fITempo entry\fR: set beats per minute
+.br
+\fILength entry\fR: set eighth notes per cycle
+.br
+
+.IP "\[ci]" 4
+Each \fBloop\fR contains the following controls
+.IP
+\fIUndo button\fR: undo last overdub/record or cancel queued record start\.
+.br
+.br
+\fIRedo button\fR: redo last overdub/record
+.br
+.br
+\fIRecord button\fR: start/stop recording at next cycle beginning\. Blinks when recording is starting/stopping\.
+.br
+.br
+\fIOverdub button\fR: startstop overdubbing immediately
+.br
+.br
+\fIMute button\fR: mute/unmute loop
+.br
+.br
+\fIClear button\fR: clear loop and undo history
+.br
+
+.IP "\[ci]" 4
+Each \fBloop\fR contains a timeline that shows the note events in the loop and a vertical marker indicating the playback position\.
+.IP "" 0
 .SH "JACK TRANSPORT"
 When \fB\-\-jack\-transport\fR is set, loop192 will
 .IP "" 4
@@ -56,9 +94,9 @@ Apply \fIcommand\fR to loop number \fI#\fR (starting at 0)\. Loop Specifying \fI
 .br
 \fIrecord\fR: start/stop recording at next cycle beginning
 .br
-\fIoverdub\fR: start/stop overdubbing immedietely
+\fIoverdub\fR: start/stop overdubbing immediately
 .br
-\fIundo\fR: undo last overdub/record
+\fIundo\fR: undo last overdub/record or cancel queued record start
 .br
 \fIredo\fR: redo last overdub/record
 .br
