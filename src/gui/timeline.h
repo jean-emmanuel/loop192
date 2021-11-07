@@ -31,7 +31,6 @@ class Timeline : public DrawingArea {
         Loop            *m_loop;
         Cairo::RefPtr<Cairo::ImageSurface> m_surface;
 
-        int              m_dirty;
         int              m_last_marker_pos;
         int              m_next_marker_pos;
         bool             m_queue_draw_background;

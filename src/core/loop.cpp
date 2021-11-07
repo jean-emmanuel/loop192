@@ -61,7 +61,7 @@ Loop::process()
             } else {
                 // expand loop length (+1 measure)
                 m_length += m_engine->m_length;
-                m_dirty++;
+                set_dirty();
             }
 
         }
@@ -261,7 +261,7 @@ Loop::link_notes(bool reset /*=false*/)
         }
     }
 
-    m_dirty++;
+    set_dirty();
 
     unlock();
 
@@ -297,7 +297,7 @@ Loop::record_event(snd_seq_event_t alsa_event)
     }
     if (alsa_event.type == SND_SEQ_EVENT_NOTEOFF) {
         link_notes();
-        m_dirty++;
+        set_dirty();
     }
     unlock();
 }
@@ -320,7 +320,7 @@ Loop::clear()
     while (!m_events_redo.empty()) {
         m_events_redo.pop();
     }
-    m_dirty++;
+    set_dirty();
     m_has_undo = false;
     m_has_redo = false;
 
@@ -336,11 +336,10 @@ Loop::push_undo()
         m_events_undo.size() == 0
     ) {
         m_events_undo.push(m_events);
-        // link_notes();
         while (!m_events_redo.empty()) {
             m_events_redo.pop();
         }
-        m_dirty++;
+        set_dirty();
         m_has_redo = false;
         m_has_undo = true;
     }
@@ -362,7 +361,7 @@ Loop::pop_undo()
         m_events_redo.push(m_events);
         m_events = m_events_undo.top();
         m_events_undo.pop();
-        m_dirty++;
+        set_dirty();
         m_has_redo = true;
         m_record_stopping = false;
         m_recording = false;
@@ -381,7 +380,7 @@ Loop::pop_redo()
         m_events_undo.push(m_events);
         m_events = m_events_redo.top();
         m_events_redo.pop();
-        m_dirty++;
+        set_dirty();
         m_has_undo = true;
         link_notes(true);
     }
@@ -395,4 +394,22 @@ Loop::cache_notes_list()
     lock();
     m_notes_draw = m_notes;
     unlock();
+}
+
+void
+Loop::set_dirty()
+{
+    lock();
+    m_dirty = true;
+    unlock();
+}
+
+bool
+Loop::is_dirty()
+{
+    lock();
+    bool dirty = m_dirty;
+    m_dirty = false;
+    unlock();
+    return dirty;
 }

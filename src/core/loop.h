@@ -99,6 +99,9 @@ class Loop
         void pop_undo();
         void pop_redo();
 
+        void set_dirty();
+        bool is_dirty();
+
         void cache_notes_list();
 
 };

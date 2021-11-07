@@ -146,7 +146,7 @@ MainWindow::MainWindow(Engine * engine, Glib::RefPtr<Gtk::Application> app, nsm_
     m_toolbar_length.set_alignment(0.5);
     m_toolbar_length.set_adjustment(m_toolbar_length_adj);
     m_toolbar_length.signal_value_changed().connect([&]{
-        m_engine->m_queue_length = m_toolbar_length.get_value();
+        m_engine->set_measure_length(m_toolbar_length.get_value());
     });
     m_toolbar.pack_start(m_toolbar_length, false, false);
 

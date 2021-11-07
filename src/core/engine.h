@@ -63,7 +63,7 @@ class Engine
         int m_length;
         int get_length(){return m_length;};
         double m_queue_length;
-        
+
         int m_n_loops;
         std::list <Loop> m_loops;
 

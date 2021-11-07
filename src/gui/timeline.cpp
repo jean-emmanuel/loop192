@@ -21,7 +21,6 @@ Timeline::Timeline(Loop * loop)
 {
     m_loop = loop;
 
-    m_dirty = 0;
     m_last_marker_pos = 0;
     m_next_marker_pos = 0;
 
@@ -159,8 +158,7 @@ Timeline::update()
     const int width = allocation.get_width();
     m_next_marker_pos = 2 + (width - 4) * m_loop->m_lasttick / m_loop->m_length;
 
-    if (m_dirty != m_loop->m_dirty) {
-        m_dirty = m_loop->m_dirty;
+    if (m_loop->is_dirty()) {
         m_queue_draw_background = true;
         queue_draw();
     } else {
