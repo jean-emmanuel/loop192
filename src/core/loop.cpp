@@ -20,7 +20,7 @@ Loop::Loop(Engine * engine, int id, snd_seq_t * seq, int port)
     m_id = id;
     m_alsa_seq = seq;
     m_alsa_port = port;
-    m_mutex = new std::mutex();
+    m_mutex = new std::recursive_mutex();
 
     m_recording = false;
     m_overdubbing = false;
@@ -36,11 +36,6 @@ Loop::Loop(Engine * engine, int id, snd_seq_t * seq, int port)
     m_dirty = 0;
     m_has_undo = false;
     m_has_redo = false;
-    m_queue_undo = false;
-    m_queue_redo = false;
-    m_queue_overdub_start = false;
-    m_queue_overdub_stop = false;
-    m_queue_clear = false;
 }
 
 Loop::~Loop()
@@ -106,38 +101,37 @@ Loop::process()
     }
 
     m_lasttick = m_tick;
-
-    // thread safe ui callbacks
-    if (m_queue_undo) pop_undo();
-    if (m_queue_redo) pop_redo();
-    if (m_queue_overdub_start) start_overdubbing();
-    if (m_queue_overdub_stop) stop_overdubbing();
-    if (m_queue_clear) clear();
 }
 
 void
 Loop::queue_start_recording()
 {
+    lock();
     if (!m_record_starting) {
         printf("Loop %i queued start recording\n", m_id);
         m_record_starting = true;
         m_record_stopping = false;
+        m_has_undo = true;
     }
+    unlock();
 }
 
 void
 Loop::queue_stop_recording()
 {
+    lock();
     if (!m_record_stopping) {
         printf("Loop %i queued stop recording\n", m_id);
         m_record_starting = false;
         m_record_stopping = true;
     }
+    unlock();
 }
 
 void
 Loop::start_recording()
 {
+    lock();
     stop_overdubbing();
     m_record_starting = false;
     if (!m_recording) {
@@ -147,47 +141,54 @@ Loop::start_recording()
         m_starttick = m_engine->m_tick;
         push_undo();
     }
+    unlock();
 }
 
 void
 Loop::stop_recording()
 {
+    lock();
     m_record_stopping = false;
     if (m_recording) {
         printf("Loop %i stopped recording\n", m_id);
         m_recording = false;
         link_notes(true);
     }
+    unlock();
 }
 
 void
 Loop::start_overdubbing()
 {
+    lock();
     stop_recording();
     if (!m_overdubbing) {
         printf("Loop %i started overdubbing\n", m_id);
         m_overdubbing = true;
         push_undo();
     }
-    m_queue_overdub_start = false;
+    unlock();
 }
 
 void
 Loop::stop_overdubbing()
 {
+    lock();
     if (m_overdubbing) {
         printf("Loop %i stopped overdubbing\n", m_id);
         m_overdubbing = false;
         link_notes(true);
     }
-    m_queue_overdub_stop = false;
+    unlock();
 }
 
 void
 Loop::set_mute(bool mute)
 {
+    lock();
     m_mute = mute;
     if (m_mute) notes_off();
+    unlock();
 }
 
 void
@@ -294,20 +295,18 @@ Loop::record_event(snd_seq_event_t alsa_event)
         m_events.push_back(event);
         m_events.sort();
     }
-    unlock();
     if (alsa_event.type == SND_SEQ_EVENT_NOTEOFF) {
         link_notes();
         m_dirty++;
     }
+    unlock();
 }
 
 void
 Loop::clear()
 {
-    notes_off();
-
     lock();
-
+    notes_off();
     m_events.clear();
     m_notes.clear();
     m_length = m_engine->m_length;
@@ -324,10 +323,8 @@ Loop::clear()
     m_dirty++;
     m_has_undo = false;
     m_has_redo = false;
-    m_queue_clear = false;
 
     unlock();
-
 }
 
 void
@@ -353,38 +350,43 @@ Loop::push_undo()
 void
 Loop::pop_undo()
 {
-    notes_off();
-    if (m_events_undo.size() > 0)
+    lock();
+
+    if (m_record_starting)
     {
-        lock();
+        m_record_starting = false;
+    }
+    else if (m_events_undo.size() > 0)
+    {
+        notes_off();
         m_events_redo.push(m_events);
         m_events = m_events_undo.top();
         m_events_undo.pop();
         m_dirty++;
         m_has_redo = true;
-        unlock();
+        m_record_stopping = false;
+        m_recording = false;
         link_notes(true);
     }
     if (m_events_undo.size() == 0) m_has_undo = false;
-    m_queue_undo = false;
+    unlock();
 }
 
 void
 Loop::pop_redo()
 {
+    lock();
     if (m_events_redo.size() > 0)
     {
-        lock();
         m_events_undo.push(m_events);
         m_events = m_events_redo.top();
         m_events_redo.pop();
         m_dirty++;
         m_has_undo = true;
-        unlock();
         link_notes(true);
     }
     if (m_events_redo.size() == 0) m_has_redo = false;
-    m_queue_redo = false;
+    unlock();
 }
 
 void

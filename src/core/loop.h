@@ -43,7 +43,7 @@ class Loop
         Engine * m_engine;
         int m_id;
 
-        std::mutex  *m_mutex;
+        std::recursive_mutex  *m_mutex;
         void lock(){m_mutex->lock();};
         void unlock(){m_mutex->unlock();};
 
@@ -75,11 +75,6 @@ class Loop
 
         bool m_overdubbing;
 
-        bool m_queue_overdub_start;
-        bool m_queue_overdub_stop;
-        bool m_queue_undo;
-        bool m_queue_redo;
-        bool m_queue_clear;
         int  m_dirty;
 
         void process();

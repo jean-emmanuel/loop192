@@ -161,7 +161,7 @@ Engine::osc_init()
     printf("OSC server listening on port %s\n", m_osc_port);
 
     for (int i = 0; i < m_n_loops; i++) {
-        std::string path = "/ml/" + std::to_string(i) + "/hit";
+        std::string path = "/loop/" + std::to_string(i) + "/hit";
         lo_server_add_method(m_osc_server, path.c_str(), "s", Engine::osc_hit_handler, this);
 
     }
@@ -180,7 +180,7 @@ Engine::osc_hit_handler(const char *path, const char *types, lo_arg ** argv, int
     Engine *self = (Engine *)user_data;
 
     int i;
-    sscanf (path, "/ml/%i/hit", &i);
+    sscanf (path, "/loop/%i/hit", &i);
 
     std::list<Loop>::iterator it = self->m_loops.begin();
     std::advance(it, i);
@@ -243,7 +243,7 @@ Engine::osc_cmd_handler(const char *path, const char *types, lo_arg ** argv, int
         json += "\"playing\":" + std::to_string(self->m_playing) + ",";
         json += "\"tick\":" + std::to_string(self->m_tick) + ",";
         json += "\"length\":" + std::to_string(self->m_length) + ",";
-        json += "\"bpm\":" + std::to_string(self->m_bpm) + ",";
+        json += "\"tempo\":" + std::to_string(self->m_bpm) + ",";
         json += "\"loops\":[";
         for (std::list <Loop>::iterator i = self->m_loops.begin(); i != self->m_loops.end(); i++) {
             json += "{";
