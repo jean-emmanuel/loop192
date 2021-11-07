@@ -119,8 +119,7 @@ Timeline::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
             allocation.get_width(),
             allocation.get_height()
         );
-        draw_background();
-        m_queue_draw_background = false;
+        m_queue_draw_background = true;
     }
 
     if (m_queue_draw_background)
