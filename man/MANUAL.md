@@ -53,8 +53,8 @@ The main window consists in a toolbar and a list of loops.
 
 When `--jack-transport` is set, loop192 will
 
-    - follow start / stop commands from other clients
-    - send start / stop commands to other clients
+    - follow start/stop commands from other clients
+    - send start/stop commands to other clients
     - use the transport master's bpm
     - set its position to 0 whenever the transport stops or restarts
     - **not** attempt to reposition within loops
@@ -103,7 +103,6 @@ When `--jack-transport` is set, loop192 will
       "mute": <int>,
       "recording": <int>,
       "waiting": <int>,
-      "record_stopping": <int>,
       "overdubbing": <int>
     },
     ...

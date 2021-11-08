@@ -248,8 +248,7 @@ Engine::osc_cmd_handler(const char *path, const char *types, lo_arg ** argv, int
             json += "\"length\":" + std::to_string((*i).m_length) + ",";
             json += "\"mute\":" + std::to_string((*i).m_mute) + ",";
             json += "\"recording\":" + std::to_string((*i).m_recording) + ",";
-            json += "\"record_starting\":" + std::to_string((*i).m_record_starting) + ",";
-            json += "\"record_stopping\":" + std::to_string((*i).m_record_stopping) + ",";
+            json += "\"waiting\":" + std::to_string((*i).m_record_starting || (*i).m_record_stopping) + ",";
             json += "\"overdubbing\":" + std::to_string((*i).m_overdubbing);
             json += "},";
         }
