@@ -28,7 +28,7 @@ loop192 is a MIDI looper that works like sooperlooper but with MIDI instead of a
 
 ## USER INTERFACE
 
-The main window consist in a toolbar and a list of loops.
+The main window consists in a toolbar and a list of loops.
 
 * The **toolbar** contains the following controls
 
@@ -43,7 +43,7 @@ The main window consist in a toolbar and a list of loops.
     *Undo button*: undo last overdub/record or cancel queued record start.<br/>
     *Redo button*: redo last overdub/record<br/>
     *Record button*: start/stop recording at next cycle beginning. Blinks when recording is starting/stopping.<br/>
-    *Overdub button*: startstop overdubbing immediately<br/>
+    *Overdub button*: start/stop overdubbing immediately<br/>
     *Mute button*: mute/unmute loop<br/>
     *Clear button*: clear loop and undo history<br/>
 
