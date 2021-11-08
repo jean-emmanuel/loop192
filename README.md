@@ -22,7 +22,7 @@ make clean && make -j8
 Usage: ./src/loop192 [options...]
 Options:
   -l <int> , --loops=<int>         number of midi loops (default: 8)
-  -p <str> , --osc-port=<str>      udp in port number or unix socket path for OSC server (default: 5244)
+  -p <str> , --osc-port=<str>      udp in port number or unix socket path for OSC server
   -j , --jack-transport            follow jack transport
   -n , --no-gui                    headless mode
   -h , --help                      this usage output
