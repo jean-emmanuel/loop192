@@ -7,6 +7,8 @@
 \fBloop192\fR [OPTION\|\.\|\.\|\.]
 .SH "DESCRIPTION"
 loop192 is a MIDI looper that works like sooperlooper but with MIDI instead of audio\.
+.P
+Only the following events are recorded: notes, pitchbend, control changes and program changes\. When a loop is muted or when the transport is stopped, notes off will be emitted automatically as well a pitchbend with a value of zero if the loop contains any pitchbend events\. This behavior can be extended to control changes using the \fB\-\-release\-controls\fR option, this can be especially useful for controls such as sustain\.
 .SH "OPTIONS"
 .TP
 \fB\-h, \-\-help\fR
@@ -14,6 +16,9 @@ Show available options
 .TP
 \fB\-p, \-\-osc\-port\fR \fIport\fR
 OSC input port (udp port number or unix socket path)
+.TP
+\fB\-r, \-\-release\-controls\fR [\fIint\fR \|\.\|\.\|\.]
+List of control numbers separated by spaces that should be reset to 0 when muting a loop or stopping transport
 .TP
 \fB\-j, \-\-jack\-transport\fR
 Sync to jack transport
