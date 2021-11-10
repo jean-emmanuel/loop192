@@ -22,6 +22,7 @@
 extern bool global_nsm_gui;
 extern bool global_nsm_optional_gui_support;
 
+
 namespace Config
 {
 

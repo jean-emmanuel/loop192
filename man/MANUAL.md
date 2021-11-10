@@ -9,6 +9,8 @@ loop192(1) -- live MIDI sequencer
 
 loop192 is a MIDI looper that works like sooperlooper but with MIDI instead of audio.
 
+Only the following events are recorded: notes, pitchbend, control changes and program changes. When a loop is muted or when the transport is stopped, notes off will be emitted automatically as well a pitchbend with a value of zero if the loop contains any pitchbend events. This behavior can be extended to control changes using the `--release-controls` option, this can be especially useful for controls such as sustain.
+
 ## OPTIONS
 
 * `-h, --help`:
@@ -16,6 +18,10 @@ loop192 is a MIDI looper that works like sooperlooper but with MIDI instead of a
 
 * `-p, --osc-port` <port>:
     OSC input port (udp port number or unix socket path)
+
+* `-r, --release-controls` [<int> ...]:
+    List of control numbers separated by spaces that should be reset to 0 when muting a loop or stopping transport
+
 
 * `-j, --jack-transport`:
     Sync to jack transport

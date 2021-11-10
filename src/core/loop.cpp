@@ -14,6 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "loop.h"
 
+extern bool global_release_controls_any;
+extern int global_release_controls[128];
+
 Loop::Loop(Engine * engine, int id, snd_seq_t * seq, int port)
 {
     m_engine = engine;
@@ -36,6 +39,10 @@ Loop::Loop(Engine * engine, int id, snd_seq_t * seq, int port)
     m_dirty = 0;
     m_has_undo = false;
     m_has_redo = false;
+
+    for (int i = 0; i < 128; i++) {
+        m_released_controls[i] = 0;
+    }
 }
 
 Loop::~Loop()
@@ -271,10 +278,35 @@ void
 Loop::notes_off()
 {
     lock();
-    // play noteoffs
+
+    // play noteoffs, reset pitchbend
+    // and user defined controls
+
+    bool released_pitch = false;
+    for (int i = 0; i < 128; i++) {
+        m_released_controls[i] = 0;
+    }
+
     for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
         if ((*i).m_event.type == SND_SEQ_EVENT_NOTEON && (*i).m_note_active && (*i).m_linked) {
             (*i).m_linked_event->send(m_alsa_seq, m_alsa_port);
+        }
+        if (!released_pitch && (*i).m_event.type == SND_SEQ_EVENT_PITCHBEND) {
+            snd_seq_event_t pitchoff = (*i).m_event;
+            pitchoff.data.control.value = 0;
+            Event * event = new Event(pitchoff);
+            event->send(m_alsa_seq, m_alsa_port);
+            released_pitch = true;
+        }
+        if ((*i).m_event.type == SND_SEQ_EVENT_CONTROLLER && global_release_controls_any) {
+            int cc = (*i).m_event.data.control.param;
+            if (global_release_controls[cc] && !m_released_controls[cc]) {
+                snd_seq_event_t controloff = (*i).m_event;
+                controloff.data.control.value = 0;
+                Event * event = new Event(controloff);
+                event->send(m_alsa_seq, m_alsa_port);
+                m_released_controls[cc] = 1;
+            }
         }
     }
     unlock();

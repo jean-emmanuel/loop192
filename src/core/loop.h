@@ -77,6 +77,8 @@ class Loop
 
         int  m_dirty;
 
+        int m_released_controls[128];
+
         void process();
         void record_event(snd_seq_event_t alsa_event);
 

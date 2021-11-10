@@ -25,12 +25,16 @@
 
 #include "lib/nsm.h"
 
-const char* optstring = "l:p:jnvh";
+bool global_release_controls_any = false;
+int global_release_controls[128]{0};
+
+const char* optstring = "l:p:r:jnvh";
 
 struct option long_options[] = {
     { "help", 0, 0, 'h' },
     { "loops", 1, 0, 'l' },
     { "osc-port", 1, 0, 'p' },
+    { "release-controls", 1, 0, 'r' },
     { "jack-transport", 0, 0, 'j' },
     { "no-gui", 0, 0, 'n' },
     { "version", 0, 0, 'v' },
@@ -43,12 +47,13 @@ static void usage(char *argv0)
     fprintf(stderr, "\n\n");
     fprintf(stderr, "Usage: %s [options...]\n", argv0);
     fprintf(stderr, "Options:\n");
-    fprintf(stderr, "  -l <int> , --loops=<int>         number of midi loops (default: %i)\n", DEFAULT_N_LOOPS);
-    fprintf(stderr, "  -p <str> , --osc-port=<str>      udp in port number or unix socket path for OSC server\n");
-    fprintf(stderr, "  -j , --jack-transport            follow jack transport\n");
-    fprintf(stderr, "  -n , --no-gui                    headless mode\n");
-    fprintf(stderr, "  -h , --help                      this usage output\n");
-    fprintf(stderr, "  -v , --version                   show version only\n");
+    fprintf(stderr, "  -l <int> , --loops=<int>                             number of midi loops (default: %i)\n", DEFAULT_N_LOOPS);
+    fprintf(stderr, "  -p <str> , --osc-port=<str>                          udp in port number or unix socket path for OSC server\n");
+    fprintf(stderr, "  -r [<int> ...] , --release-controls=[<int> ...]      list of control numbers separated by spaces that should be reset to 0 when muting a loop or stopping transport\n");
+    fprintf(stderr, "  -j , --jack-transport                                follow jack transport\n");
+    fprintf(stderr, "  -n , --no-gui                                        headless mode\n");
+    fprintf(stderr, "  -h , --help                                          this usage output\n");
+    fprintf(stderr, "  -v , --version                                       show version only\n");
 }
 
 struct OptionInfo
@@ -100,6 +105,18 @@ static void parse_options (int argc, char **argv, OptionInfo & option_info)
         case 'p':
             option_info.port = optarg;
             break;
+        case 'r':
+        {
+            int c = atoi(optarg);
+            if (c >= 0 && c < 128) {
+                global_release_controls[c] = 1;
+                global_release_controls_any = true;
+            } else {
+                fprintf(stderr, "Control numbers must be between 0 and 127.");
+                exit(1);
+            }
+            break;
+        }
         case 'j':
             option_info.jack_transport++;
             break;
