@@ -21,12 +21,16 @@ make clean && make -j8
 ```
 Usage: ./src/loop192 [options...]
 Options:
-  -l <int> , --loops=<int>         number of midi loops (default: 8)
-  -p <str> , --osc-port=<str>      udp in port number or unix socket path for OSC server
-  -j , --jack-transport            follow jack transport
-  -n , --no-gui                    headless mode
-  -h , --help                      this usage output
-  -v , --version                   show version only
+  -l <int> , --loops=<int>                             number of midi loops (default: 8)
+  -p <str> , --osc-port=<str>                          udp in port number or unix socket path
+                                                       for OSC server
+  -r [<int> ...] , --release-controls=[<int> ...]      list of control numbers separated by
+                                                       spaces that should be reset to 0 when
+                                                       muting a loop or stopping transport
+  -j , --jack-transport                                follow jack transport
+  -n , --no-gui                                        headless mode
+  -h , --help                                          this usage output
+  -v , --version                                       show version only
 ```
 
 **Install**
