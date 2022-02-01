@@ -28,7 +28,7 @@
 bool global_release_controls_any = false;
 int global_release_controls[128]{0};
 
-const char* optstring = "l:p:r:jnvh";
+const char* optstring = "l:p:r:jtnvh";
 
 struct option long_options[] = {
     { "help", 0, 0, 'h' },
@@ -36,6 +36,7 @@ struct option long_options[] = {
     { "osc-port", 1, 0, 'p' },
     { "release-controls", 1, 0, 'r' },
     { "jack-transport", 0, 0, 'j' },
+    { "tcp", 0, 0, 't' },
     { "no-gui", 0, 0, 'n' },
     { "version", 0, 0, 'v' },
     { 0, 0, 0, 0 }
@@ -51,6 +52,7 @@ static void usage(char *argv0)
     fprintf(stderr, "  -p <str> , --osc-port=<str>                          udp in port number or unix socket path for OSC server\n");
     fprintf(stderr, "  -r [<int> ...] , --release-controls=[<int> ...]      list of control numbers separated by spaces that should be reset to 0 when muting a loop or stopping transport\n");
     fprintf(stderr, "  -j , --jack-transport                                follow jack transport\n");
+    fprintf(stderr, "  -t , --tcp                                           use tcp protocol instead of udp\n");
     fprintf(stderr, "  -n , --no-gui                                        headless mode\n");
     fprintf(stderr, "  -h , --help                                          this usage output\n");
     fprintf(stderr, "  -v , --version                                       show version only\n");
@@ -62,6 +64,7 @@ struct OptionInfo
         n_loops(DEFAULT_N_LOOPS),
         port(0),
         jack_transport(0),
+        osc_tcp(0),
         no_gui(0),
         show_usage(0),
         show_version(0) {}
@@ -73,6 +76,7 @@ struct OptionInfo
     const char* feedback;
 
     int jack_transport;
+    int osc_tcp;
     int no_gui;
 
     int show_usage;
@@ -119,6 +123,9 @@ static void parse_options (int argc, char **argv, OptionInfo & option_info)
         }
         case 'j':
             option_info.jack_transport++;
+            break;
+        case 't':
+            option_info.osc_tcp++;
             break;
         case 'n':
             option_info.no_gui++;
@@ -246,7 +253,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    Engine * engine = new Engine(option_info.n_loops, option_info.port, option_info.jack_transport);
+    Engine * engine = new Engine(option_info.n_loops, option_info.port, option_info.osc_tcp, option_info.jack_transport);
 
     signal(SIGABRT, &sighandler);
     signal(SIGTERM, &sighandler);

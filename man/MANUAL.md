@@ -22,9 +22,11 @@ Only the following events are recorded: notes, pitchbend, control changes and pr
 * `-r, --release-controls` [<int> ...]:
     List of control numbers separated by spaces that should be reset to 0 when muting a loop or stopping transport
 
-
 * `-j, --jack-transport`:
     Sync to jack transport
+
+* `-t, --tcp`:
+    Use tcp protocol instead of udp
 
 * `-n, --no-gui`:
     Enable headless mode

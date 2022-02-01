@@ -32,7 +32,7 @@ class Engine
 {
     public:
 
-        Engine(int n_loops, const char* osc_in_port, bool jack_transport);
+        Engine(int n_loops, const char* osc_in_port, bool osc_tcp, bool jack_transport);
         ~Engine();
 
         void process();
@@ -51,6 +51,7 @@ class Engine
         void jack_stop();
 
         const char * m_osc_port;
+        bool m_osc_tcp;
         lo_server m_osc_server;
 
         snd_seq_t * m_alsa_seq;

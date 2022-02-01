@@ -20,9 +20,10 @@
 
 extern std::string global_client_name;
 
-Engine::Engine(int n_loops, const char* osc_in_port, bool jack_transport)
+Engine::Engine(int n_loops, const char* osc_in_port, bool osc_tcp, bool jack_transport)
 {
     m_osc_port = osc_in_port;
+    m_osc_tcp = osc_tcp;
     m_n_loops = n_loops;
 
     m_playing = false;
@@ -147,7 +148,9 @@ Engine::osc_init()
 
     int proto = std::string(m_osc_port).find(std::string("osc.unix")) != std::string::npos ? LO_UNIX : LO_DEFAULT;
 
-    if (proto == LO_UNIX) {
+    if (m_osc_tcp) {
+        m_osc_server = lo_server_new_with_proto(m_osc_port, LO_TCP, osc_error);
+    } else if (proto == LO_UNIX) {
         m_osc_server = lo_server_new_from_url(m_osc_port, osc_error);
     } else {
         m_osc_server = lo_server_new(m_osc_port, osc_error);

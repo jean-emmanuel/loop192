@@ -28,6 +28,7 @@ Options:
                                                        spaces that should be reset to 0 when
                                                        muting a loop or stopping transport
   -j , --jack-transport                                follow jack transport
+  -t , --tcp                                           use tcp protocol instead of udp
   -n , --no-gui                                        headless mode
   -h , --help                                          this usage output
   -v , --version                                       show version only
