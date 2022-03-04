@@ -106,6 +106,7 @@ static void parse_options (int argc, char **argv, OptionInfo & option_info)
             break;
         case 'l':
             option_info.n_loops = atoi(optarg);
+            break;
         case 'p':
             option_info.port = optarg;
             break;
