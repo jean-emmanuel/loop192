@@ -392,7 +392,7 @@ Engine::start()
 
     for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
         (*i).notes_off();
-        (*i).m_lasttick = 0;;
+        (*i).m_lasttick = -1;
 
     }
 
@@ -410,7 +410,7 @@ Engine::stop()
         for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
             (*i).notes_off();
             (*i).m_tick = 0;
-            (*i).m_lasttick = 0;
+            (*i).m_lasttick = -1;
             (*i).m_starttick = 0;
             (*i).stop_recording();
             (*i).stop_overdubbing();

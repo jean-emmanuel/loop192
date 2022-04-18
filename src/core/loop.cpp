@@ -32,7 +32,7 @@ Loop::Loop(Engine * engine, int id, snd_seq_t * seq, int port)
     m_record_starting = false;
     m_record_stopping = false;
 
-    m_lasttick = 0;
+    m_lasttick = -1;
     m_starttick = 0;
     m_length = engine->m_length;
 
@@ -93,7 +93,7 @@ Loop::process()
                     (*i).send(m_alsa_seq, m_alsa_port);
                 }
             }
-            m_lasttick = 0;
+            m_lasttick = -1;
         }
 
         for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
@@ -244,13 +244,38 @@ Loop::link_notes(bool reset /*=false*/)
     }
 
     if (reset) {
-        // insert missing note offs
+        // insert missing note offs (at last tick)
         for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
             if ((*i).m_event.type == SND_SEQ_EVENT_NOTEON && !(*i).m_linked) {
                 snd_seq_event_t noteoff = (*i).m_event;
                 noteoff.type = SND_SEQ_EVENT_NOTEOFF;
                 Event * event = new Event(noteoff);
                 event->set_timestamp(m_length - 1);
+                m_events.push_back(*event);
+                m_events.sort();
+                (*i).m_linked_event = event;
+                event->m_linked_event = &(*i);
+                event->m_linked = true;
+                (*i).m_linked = true;
+
+                // simple note representation for UI
+                Note n;
+                n.x1 = (*i).get_timestamp();
+                n.x2 = event->get_timestamp();
+                n.y = (*i).m_event.data.note.note;
+                m_notes.push_back(n);
+            }
+        }
+
+        // insert missing note ons (at first tick)
+        for (std::list <Event>::iterator i = m_events.begin(); i != m_events.end(); i++) {
+            if ((*i).m_event.type == SND_SEQ_EVENT_NOTEOFF && !(*i).m_linked) {
+                printf("missing on addded\n" );
+                snd_seq_event_t noteon = (*i).m_event;
+                noteon.type = SND_SEQ_EVENT_NOTEON;
+                noteon.data.note.velocity = 100;
+                Event * event = new Event(noteon);
+                event->set_timestamp(0);
                 m_events.push_back(*event);
                 m_events.sort();
                 (*i).m_linked_event = event;
