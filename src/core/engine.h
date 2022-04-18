@@ -56,7 +56,7 @@ class Engine
 
         snd_seq_t * m_alsa_seq;
 
-        long long m_last_time;
+        long double m_last_time;
         long m_tick;
         bool m_playing;
         double m_bpm;

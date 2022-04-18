@@ -69,19 +69,19 @@ Engine::process()
 
     // time
     struct timespec system_time;
-    clock_gettime(CLOCK_REALTIME, &system_time);
-    long long now_time = (system_time.tv_sec * 1000000) + (system_time.tv_nsec / 1000);
-    long long delta_time = now_time - m_last_time;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &system_time);
+    long double now_time = (system_time.tv_sec * 1000000) + (system_time.tv_nsec / 1000);
+    long double delta_time = now_time - m_last_time;
 
-    // delta time to ticks
+    // delta time to whole ticks
     double tick_duration = 1000000 * 60. / m_bpm / Config::PPQN;
     int ticks = (int)(delta_time / tick_duration);
 
-    // increment time
-    m_last_time += ticks * tick_duration;
-
     if (m_playing && ticks > 0) {
+        // increment time
+        m_last_time += ticks * tick_duration;
         m_tick += ticks;
+
         // process loops
         for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
             (*i).process();
@@ -387,7 +387,7 @@ Engine::start()
     m_playing = true;
     m_tick = 0;
     struct timespec system_time;
-    clock_gettime(CLOCK_REALTIME, &system_time);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &system_time);
     m_last_time = (system_time.tv_sec * 1000000) + (system_time.tv_nsec / 1000);
 
     for (std::list <Loop>::iterator i = m_loops.begin(); i != m_loops.end(); i++) {
