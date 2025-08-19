@@ -19,9 +19,6 @@
 #include "engine.h"
 #include "event.h"
 
-// ensure dot as decimal separator in json
-std::setlocale(LC_NUMERIC, "C")
-
 extern std::string global_client_name;
 
 Engine::Engine(int n_loops, const char* osc_in_port, bool osc_tcp, bool jack_transport)
@@ -43,6 +40,9 @@ Engine::Engine(int n_loops, const char* osc_in_port, bool osc_tcp, bool jack_tra
     set_measure_length(Config::DEFAULT_8TH_PER_CYCLE);
 
     midi_init();
+
+    // ensure dot as decimal separator in json
+    std::setlocale(LC_NUMERIC, "C");
 
     if (m_osc_port != 0) osc_init();
 
