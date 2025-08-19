@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
-#include <clocale>
+#include <format>
 
 #include "../config.h"
 #include "engine.h"
@@ -244,7 +244,7 @@ Engine::osc_cmd_handler(const char *path, const char *types, lo_arg ** argv, int
         json += "\"playing\":" + std::to_string(self->m_playing) + ",";
         json += "\"tick\":" + std::to_string(self->m_tick) + ",";
         json += "\"length\":" + std::to_string(self->m_length) + ",";
-        json += "\"tempo\":" + std::to_string(self->m_bpm) + ",";
+        json += "\"tempo\":" + std::format("{}", self->m_bpm) + ",";
         json += "\"loops\":[";
         for (std::list <Loop>::iterator i = self->m_loops.begin(); i != self->m_loops.end(); i++) {
             json += "{";
