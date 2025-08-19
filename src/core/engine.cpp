@@ -41,9 +41,6 @@ Engine::Engine(int n_loops, const char* osc_in_port, bool osc_tcp, bool jack_tra
 
     midi_init();
 
-    // ensure dot as decimal separator in json
-    std::setlocale(LC_NUMERIC, "C");
-
     if (m_osc_port != 0) osc_init();
 
     if (jack_transport) jack_init();

@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <pthread.h>
+#include <clocale>
 
 #include "config.h"
 #include "core/engine.h"
@@ -232,6 +233,9 @@ void sighandler(int sig)
 
 int main(int argc, char* argv[])
 {
+
+    // ensure dot as decimal separator in json
+    std::setlocale(LC_NUMERIC, "C");
 
     OptionInfo option_info;
 
