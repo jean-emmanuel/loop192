@@ -13,10 +13,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
+#include <clocale>
 
 #include "../config.h"
 #include "engine.h"
 #include "event.h"
+
+// ensure dot as decimal separator in json
+std::setlocale(LC_NUMERIC, "C")
 
 extern std::string global_client_name;
 
