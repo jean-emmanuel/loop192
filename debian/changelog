@@ -1,0 +1,73 @@
+loop192 (0.1.0) UNRELEASED; urgency=medium
+
+  [ bordun ]
+  *
+
+  [ jean-emmanuel ]
+  * init
+  * overdub, undo, redo & trig
+  * fix linked note logic
+  * linked notes fix
+  * receive osc messages in main thread
+  * misc stuff & osc transport ctrl
+  * jack transport and misc stuffs
+  * some clean
+  * minor fixes
+  * osc status cmd
+  * don't move playhead when stopped
+  * clean
+  * remove unused options
+  * clean
+  * wip gui
+  * typo
+  * many fixes and continue gui work
+  * draw grid
+  * draw tweaks
+  * mute
+  * typo
+  * restructure repo
+  * update build dep
+  * lots of gui stuf and some loop playback logic fixes
+  * trad scrollbar
+  * Revert "typo"
+  * moar gui
+  * some gui threading issue + attempt to reduce cpu hit
+  * split timeline widget, etc
+  * idle marker rest
+  * man
+  * ignore html man
+  * partly Revert "split timeline widget"
+  * add clear button & clean
+  * record button blink when waiting
+  * nsm support
+  * make osc input optional
+  * menubar
+  * readme: screenshot
+  * simple menu close handler
+  * engine: add guard when receiving midi
+  * timeline: efficient marker draw
+  * timeline: simplify note drawing process
+  * cache note list before drawing; avoid auto noteoff in case no link was made
+  * lock loop resources
+  * use a recursive mutex and get rid of queued callbacks
+  * remove engine ui queued callback, use bool dirty flag for loops
+  * nsm capable
+  * update man
+  * man formatting
+  * fix dirty loop check routine
+  * dry
+  * man typo
+  * osc api fix
+  * readme update
+  * loop: reset pitch and user defined controls on mute/stop;
+  * update man
+  * update readme
+  * osc: tcp support
+  * missing break == accident
+  * loop: avoid missing first tick in loop; insert midding note ons when linking
+  * engine: fix clock drift
+
+  [ Plagiat Gang Of Bros ]
+  * missing mkdir in makefile
+
+ -- bordun <jean-emmanuel@ammd.net>  Tue, 19 Aug 2025 14:42:38 +0200
