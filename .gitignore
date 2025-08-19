@@ -2,3 +2,9 @@
 *.d
 src/loop192
 MANUAL.1.html
+
+debian/*
+!debian/control
+!debian/copyright
+!debian/rules
+!debian/changelog

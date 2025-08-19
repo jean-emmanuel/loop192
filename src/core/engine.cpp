@@ -175,7 +175,7 @@ Engine::osc_init()
 }
 
 int
-Engine::osc_hit_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data)
+Engine::osc_hit_handler(const char *path, const char *types, lo_arg ** argv, int argc, lo_message data, void *user_data)
 {
     Engine *self = (Engine *)user_data;
 
@@ -209,7 +209,7 @@ Engine::osc_hit_handler(const char *path, const char *types, lo_arg ** argv, int
 }
 
 int
-Engine::osc_ctrl_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data)
+Engine::osc_ctrl_handler(const char *path, const char *types, lo_arg ** argv, int argc, lo_message data, void *user_data)
 {
     Engine *self = (Engine *)user_data;
 
@@ -223,7 +223,7 @@ Engine::osc_ctrl_handler(const char *path, const char *types, lo_arg ** argv, in
 }
 
 int
-Engine::osc_cmd_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data)
+Engine::osc_cmd_handler(const char *path, const char *types, lo_arg ** argv, int argc, lo_message data, void *user_data)
 {
     Engine *self = (Engine *)user_data;
 

@@ -72,9 +72,9 @@ class Engine
         double m_jack_bpm;
         bool m_jack_running;
 
-        static int osc_hit_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data);
-        static int osc_ctrl_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data);
-        static int osc_cmd_handler(const char *path, const char *types, lo_arg ** argv, int argc, void *data, void *user_data);
+        static int osc_hit_handler(const char *path, const char *types, lo_arg ** argv, int argc, lo_message data, void *user_data);
+        static int osc_ctrl_handler(const char *path, const char *types, lo_arg ** argv, int argc, lo_message data, void *user_data);
+        static int osc_cmd_handler(const char *path, const char *types, lo_arg ** argv, int argc, lo_message data, void *user_data);
 
         static int jack_process_callback(jack_nframes_t nframes, void* arg);
         static void jack_shutdown(void *arg);

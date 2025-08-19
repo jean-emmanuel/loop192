@@ -50,3 +50,10 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/share/pixmaps/loop192.xpm
 	rm -f $(DESTDIR)$(PREFIX)/share/applications/loop192.desktop
 	rm -f $(DESTDIR)$(PREFIX)/share/man/man1/loop192.1
+
+
+deb-changelog:
+	gbp dch
+
+deb:
+	dpkg-buildpackage --build=binary --unsigned-changes

@@ -149,7 +149,7 @@ static void parse_options (int argc, char **argv, OptionInfo & option_info)
 
     if (option_info.show_version) {
         fprintf(stdout, BINARY_NAME);
-        fprintf(stdout, " version %s\n", "0.0.0");
+        fprintf(stdout, " version %s\n", "0.1.0");
         exit(0);
     }
 }
