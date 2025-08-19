@@ -235,7 +235,7 @@ int main(int argc, char* argv[])
 {
 
     // ensure dot as decimal separator in json
-    std::setlocale(LC_NUMERIC, "C");
+    std::locale::global(std::locale("C"));
 
     OptionInfo option_info;
 
